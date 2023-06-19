@@ -1,5 +1,6 @@
 const express = require('express');
 const projectRoutes = require('./routes/project.route');
+const tagRoutes = require('./routes/tag.route');
 
 const app = express();
 
@@ -10,4 +11,5 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1", projectRoutes);
+app.use("/api/v1", tagRoutes);
 module.exports = app;
