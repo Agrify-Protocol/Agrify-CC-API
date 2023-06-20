@@ -21,7 +21,11 @@ const projectSchema = new Schema (
             type: Number,
             required: true,
             min: [0, 'At least 1'],
-        }
+        },
+        tags: [{
+            type: Schema.Types.ObjectId,
+            ref:'Tag'
+        }],
     },
     {timestamps: true}
 );
