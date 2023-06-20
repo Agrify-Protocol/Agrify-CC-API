@@ -4,7 +4,7 @@ const Tag = require('../models/tag.model');
 const getProjectById = async (req, res) => {
     const {id} = req.params;
     try {
-        const project = await Project.findById(id);
+        const project = await Project.findById(id).populate({path: 'tags'});
         if(!project){
             return res.status(404).json({message: `Project with ID: ${id} not found!`});
         }
