@@ -24,11 +24,15 @@ const getProjects = async (req, res) => {
             sortCriteria = {_id: -1};
         } else if(sortBy === 'oldest'){
             sortCriteria = {_id: 1};
+        }else if (sortBy === 'priceLowToHigh') {
+            sortCriteria = { price: 1 }; 
+        } else if (sortBy === 'priceHighToLow') {
+            sortCriteria = { price: -1 }; 
         } else {
             sortCriteria = {};
         }
 
-        const projectFields = 'title description';
+        const projectFields = 'title description price availableTonnes';
         const tagFields = 'icon';
         const skip = (page - 1) * limit;
         const projects = await Project.find({},projectFields)
