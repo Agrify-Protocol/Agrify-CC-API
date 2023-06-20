@@ -4,6 +4,19 @@ const {v4: uuidv4} = require('uuid');
 const cloudinary = require('../utils/cloudinary');
 const fs = require('fs');
 
+const getTagById = async (req, res) => {
+    const {id} = req.params;
+    try {
+        const tag = await Tag.findById(id);
+        if(!tag){
+            return res.status(404).json({message: 'Tag with Id not found!'});
+        }
+        return res.status(200).json(tag);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 const getTags = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -62,4 +75,4 @@ const createTag = async(req, res) => {
     }
 };
 
-module.exports = {createTag, getTags}
+module.exports = {createTag, getTags, getTagById}
