@@ -28,7 +28,11 @@ const getProjects = async (req, res) => {
             sortCriteria = { price: 1 }; 
         } else if (sortBy === 'priceHighToLow') {
             sortCriteria = { price: -1 }; 
-        } else {
+        }else if (sortBy === 'tonnesLeftLowToHigh') {
+            sortCriteria = { availableTonnes: 1 }; 
+        }else if (sortBy === 'tonnesLeftHighToLow') {
+            sortCriteria = { availableTonnes: -1 }; 
+        }else {
             sortCriteria = {};
         }
 
