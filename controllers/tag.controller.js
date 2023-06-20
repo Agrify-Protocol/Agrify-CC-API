@@ -4,6 +4,28 @@ const {v4: uuidv4} = require('uuid');
 const cloudinary = require('../utils/cloudinary');
 const fs = require('fs');
 
+const getTags = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const sortBy = req.query.sortBy || 'latest';
+
+        let sortCriteria;
+        if(sortBy === 'latest'){
+            sortCriteria = {_id: -1};
+        } else if(sortBy === 'oldest'){
+            sortCriteria = {_id: 1};
+        } else {
+            sortCriteria = {};
+        }
+        const skip = (page - 1) * limit;
+        const tags = await Tag.find().sort(sortCriteria).skip(skip).limit(parseInt(limit));
+        res.status(201).json(tags);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+}
+
 const createTag = async(req, res) => {
     try {
         const upload = await cloudinary.v2.uploader.upload(req.file.path);
@@ -40,4 +62,4 @@ const createTag = async(req, res) => {
     }
 };
 
-module.exports = {createTag}
+module.exports = {createTag, getTags}
