@@ -1,6 +1,10 @@
 const express = require('express');
 const projectRoutes = require('./routes/project.route');
 const tagRoutes = require('./routes/tag.route');
+const multer = require('multer');
+const upload = multer({dest: 'uploads/'});
+const cloudinary = require('./utils/cloudinary');
+
 
 const app = express();
 
@@ -12,4 +16,24 @@ app.get("/", (req, res) => {
 
 app.use("/api/v1", projectRoutes);
 app.use("/api/v1", tagRoutes);
+
+app.post('/api/v1/upload', upload.array('images'), async (req, res) => {
+  const uploadedImages = [];
+
+  const {title,description,tags} = req.body;
+
+  for (const file of req.files) {
+    const uploadResult = await cloudinary.v2.uploader.upload(file.path);
+    uploadedImages.push(uploadResult.secure_url);
+  }
+
+  // uploadedImages will contain an array of upload results for each image
+  // You can perform any necessary operations here with the uploaded images
+
+  res.status(200).json({
+    title,
+    tags,
+    uploadedImages
+  });
+});
 module.exports = app;

@@ -26,6 +26,9 @@ const projectSchema = new Schema (
             type: Schema.Types.ObjectId,
             ref:'Tag'
         }],
+        images: [{
+            type: String,
+        }],
     },
     {timestamps: true}
 );
