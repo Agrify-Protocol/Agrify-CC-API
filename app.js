@@ -1,6 +1,8 @@
 const express = require('express');
 const projectRoutes = require('./routes/project.route');
 const tagRoutes = require('./routes/tag.route');
+const authRoutes = require('./routes/auth.route');
+const profileRoutes = require('./routes/profile.route');
 const multer = require('multer');
 const upload = multer({dest: 'uploads/'});
 const cloudinary = require('./utils/cloudinary');
@@ -16,6 +18,8 @@ app.get("/", (req, res) => {
 
 app.use("/api/v1", projectRoutes);
 app.use("/api/v1", tagRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1",profileRoutes);
 
 app.post('/api/v1/upload', upload.array('images'), async (req, res) => {
   const uploadedImages = [];
