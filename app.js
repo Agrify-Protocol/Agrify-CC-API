@@ -18,6 +18,10 @@ app.get("/", (req, res) => {
     res.status(200).json({alive: "True"});
 });
 
+app.get("/api/v1/roost", (req, res) => {
+    res.status(200).json({alive: "Roost"});
+});
+
 app.use("/api/v1", projectRoutes);
 app.use("/api/v1", tagRoutes);
 app.use("/api/v1/auth", authRoutes);
