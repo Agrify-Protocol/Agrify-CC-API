@@ -71,6 +71,7 @@ const createTag = async(req, res) => {
         // const tag = await Tag.create(req.body);
         // res.status(201).json(tag);
     } catch (error) {
+        console.log(error);
         res.status(500).json(error);
     }
 };
