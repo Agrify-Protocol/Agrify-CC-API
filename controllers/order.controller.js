@@ -1,11 +1,11 @@
 const orderModel = require("../models/order.model");
 
 function generateUniqueRef(){
-    const digits = '0123456789';
+    const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let code = '';
     for (let i = 0; i < 8; i++) {
-        const randomIndex = Math.floor(Math.random() * digits.length);
-        code += digits[randomIndex];
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        code += characters[randomIndex];
     }
     return code;
 }
