@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const orderSchema = new Schema (
     {
+        orderReferenceId: {
+            type: String,
+            required: true
+        },
         certificateInfo: {
             certificateType: {
                 type: String,
