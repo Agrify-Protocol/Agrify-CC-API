@@ -1,6 +1,7 @@
 const Project = require('../models/project.model');
 const Tag = require('../models/tag.model');
 const cloudinary = require('../utils/cloudinary');
+const moment = require('moment');
 
 const getProjectById = async (req, res) => {
     const {id} = req.params;
@@ -54,36 +55,56 @@ const getProjects = async (req, res) => {
         res.status(500).json({error: 'Internal Server Error'});
     }
 }
+function generateProjectID() {
+  const digits = '0123456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    const randomIndex = Math.floor(Math.random() * digits.length);
+    code += digits[randomIndex];
+  }
+  return code;
+}
 
+function convertStringToDate(x){
+    return moment(x).toDate();
+}
 const createProject = async (req, res) => {
     try {
-        const uploadedImages = [];
-        for(const file of req.files){
-            const uploadResult = await cloudinary.v2.uploader.upload(file.path);
-            uploadedImages.push(uploadResult.secure_url);
+        const projectId = generateProjectID();
+        // console.log(req.files);
+        let uploadedImages = [];
+        let coverImage;
+        let supportingDocumentLink;
+        if(req.files){
+            for(const file of req.files.images){
+                const uploadResult = await cloudinary.v2.uploader.upload(file.path);
+                uploadedImages.push(uploadResult.secure_url);
+            }
+            const coverImageUpload = await cloudinary.v2.uploader.upload(req.files.cover[0].path);
+            coverImage = coverImageUpload.secure_url;
+            const supportingDocumentLinkUpload = await cloudinary.v2.uploader.upload(req.files.supdoc[0].path);
+            supportingDocumentLink = supportingDocumentLinkUpload.secure_url;
         }
-        const {title, description, price, availableTonnes, tags} = req.body;
-        
+         
+        const {
+            title, description, price, availableTonnes, tags,minimumPurchaseTonnes, location, countryOfOrigin,creditStartDate,creditEndDate,projectProvider, projectWebsite,blockchainAddress, typeOfProject, certification, certificationURL, certificateCode
+            } = req.body;
+            
+
         const project = await Project.create({
-            title, 
-            description, 
-            price: parseFloat(price), 
-            availableTonnes: parseInt(availableTonnes),
-            images: uploadedImages
+            title,description,price: parseFloat(price),availableTonnes: parseInt(availableTonnes),images: uploadedImages,projectId, minimumPurchaseTonnes: parseInt(minimumPurchaseTonnes),location, countryOfOrigin, creditStartDate: convertStringToDate(creditStartDate),creditEndDate: convertStringToDate(creditEndDate),coverImage: coverImage, projectProvider, projectWebsite,blockchainAddress, typeOfProject, certification, certificationURL, certificateCode, supportingDocument: supportingDocumentLink
         });
         
-        // // find existing tags by their IDs
+        // find existing tags by their IDs
         const existingTags = await Tag.find({_id: {$in: tags}});
 
         // // add the existing tags to project
         project.tags.push(...existingTags);
 
-        await project.save();
+        // await project.save();
         res.status(201).json(project);
-        // res.json({images});
-        // console.log(tags);
-        // console.log(images);
     } catch (error) {
+        console.log(error);
         res.status(500).json(error);
     }
 };

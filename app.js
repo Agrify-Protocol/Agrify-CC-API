@@ -8,12 +8,14 @@ const adminRoutes = require('./routes/admin.route');
 const multer = require('multer');
 const upload = multer({dest: 'uploads/'});
 const cloudinary = require('./utils/cloudinary');
+const fileUpload = require('express-fileupload');
 require('dotenv').config();
 
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+// app.use(fileUpload({useTempFiles: true}));
 
 app.get("/", (req, res) => {
     res.status(200).json({alive: "True"});
