@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const projectRoutes = require('./routes/project.route');
+const orderRoutes = require('./routes/order.route');
 const tagRoutes = require('./routes/tag.route');
 const authRoutes = require('./routes/auth.route');
 const profileRoutes = require('./routes/profile.route');
@@ -8,12 +9,14 @@ const adminRoutes = require('./routes/admin.route');
 const multer = require('multer');
 const upload = multer({dest: 'uploads/'});
 const cloudinary = require('./utils/cloudinary');
+const fileUpload = require('express-fileupload');
 require('dotenv').config();
 
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+// app.use(fileUpload({useTempFiles: true}));
 
 app.get("/", (req, res) => {
     res.status(200).json({alive: "True"});
@@ -24,6 +27,7 @@ app.get("/api/v1/roost", (req, res) => {
 });
 
 app.use("/api/v1", projectRoutes);
+app.use("/api/v1", orderRoutes);
 app.use("/api/v1", tagRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1",profileRoutes);

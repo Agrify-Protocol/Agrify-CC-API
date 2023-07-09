@@ -29,6 +29,55 @@ const projectSchema = new Schema (
         images: [{
             type: String,
         }],
+        coverImage: {
+            type: String
+        },
+        projectId: {
+            type: String,
+            required: true
+        },
+        minimumPurchaseTonnes: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        location: {
+            type: String,
+        },
+        countryOfOrigin: {
+            type: String,
+            required: true
+        },
+        projectProvider: {
+            type: String,
+        },
+        projectWebsite: {
+            type: String,
+        },
+        blockchainAddress: {
+            type: String,
+        },
+        typeOfProject: {
+            type: String
+        },
+        certification: {
+            type: String
+        },
+        certificationURL: {
+            type: String
+        },
+        certificateCode: {
+            type: String
+        },
+        creditStartDate: {
+            type: Date
+        },
+        creditEndDate: {
+            type: Date
+        },
+        supportingDocument: {
+            type: String
+        },
     },
     {timestamps: true}
 );
