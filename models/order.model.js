@@ -2,6 +2,28 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const orderSchema = new Schema (
     {
+        total: {
+            type: Number,
+            required: true,
+            default: 0.0
+        },
+        orderItems: [
+            {
+                project: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    required: true,
+                    ref: 'Project'
+                },
+                quantity: {
+                    type: Number,
+                    required: true
+                },
+                price: {
+                    type: Number,
+                    required: true
+                },
+            }
+        ],
         orderReferenceId: {
             type: String,
             required: true
