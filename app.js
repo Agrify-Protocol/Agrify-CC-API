@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const projectRoutes = require('./routes/project.route');
+const orderRoutes = require('./routes/order.route');
 const tagRoutes = require('./routes/tag.route');
 const authRoutes = require('./routes/auth.route');
 const profileRoutes = require('./routes/profile.route');
@@ -26,6 +27,7 @@ app.get("/api/v1/roost", (req, res) => {
 });
 
 app.use("/api/v1", projectRoutes);
+app.use("/api/v1", orderRoutes);
 app.use("/api/v1", tagRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1",profileRoutes);
