@@ -115,4 +115,9 @@ const createCharge = async (tokenId, amount) => {
   return charge;
 };
 
-module.exports = { createOrder, payStripe };
+const getMyOrders = async (req, res, next) => {
+  const orders = await orderModel.find({ user: req.userId });
+  return res.status(200).json({ orders });
+};
+
+module.exports = { createOrder, payStripe, getMyOrders };
