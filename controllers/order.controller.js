@@ -116,7 +116,13 @@ const createCharge = async (tokenId, amount) => {
 };
 
 const getMyOrders = async (req, res, next) => {
-  const orders = await orderModel.find({ user: req.userId });
+  const orders = await orderModel.find({ user: req.userId }).populate({
+    path: "orderItems",
+    populate: {
+      path: "project",
+      select: "title",
+    },
+  });
   return res.status(200).json({ orders });
 };
 
