@@ -4,14 +4,6 @@ const fs = require("fs");
 const path = require("path");
 const mg = require("nodemailer-mailgun-transport");
 
-const mailgunAuth = {
-  auth: {
-    api_key: "cdb8f3d0610de33607024dc7f58f5932-aa4b0867-109e0510",
-    domain:
-      "https://app.mailgun.com/app/sending/domains/sandbox3ce45b8ccb694c768e813ab0ddf46375.mailgun.org",
-  },
-};
-
 const sendEmail = async (email, subject, payload, template) => {
   try {
     const transporter = nodemailer.createTransport({
