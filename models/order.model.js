@@ -7,6 +7,7 @@ const orderSchema = new Schema(
       required: true,
       default: 0.0,
     },
+    paymentRef: { type: String },
     orderItems: [
       {
         project: {

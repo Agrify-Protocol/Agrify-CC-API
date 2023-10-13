@@ -11,6 +11,34 @@ function generateUniqueRef() {
   }
   return code;
 }
+
+const createOrderWithPaystack = async (req, res) => {
+  try {
+    const orderReferenceId = generateUniqueRef();
+    const { certificateInfo, orderItems, total, paymentRef } = req.body;
+    const order = await orderModel.create({
+      paymentRef,
+      certificateInfo,
+      orderReferenceId,
+      orderItems,
+      total,
+      user: req.userId,
+    });
+
+    orderItems.forEach(async (item) => {
+      const p = await projectModel.findOne({ _id: item.project });
+      p.availableTonnes -= item.quantity;
+      const updatedProject = await p.save();
+    });
+    res.status(201).json(order);
+  } catch (error) {
+    res.status(500).json({
+      error,
+    });
+    console.log(error);
+  }
+};
+
 const createOrder = async (req, res) => {
   try {
     const orderReferenceId = generateUniqueRef();
@@ -126,4 +154,9 @@ const getMyOrders = async (req, res, next) => {
   return res.status(200).json({ orders });
 };
 
-module.exports = { createOrder, payStripe, getMyOrders };
+module.exports = {
+  createOrder,
+  payStripe,
+  getMyOrders,
+  createOrderWithPaystack,
+};
