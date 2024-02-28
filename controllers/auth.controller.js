@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/user.model");
+const MrvUser = require("../models/mrv_user.model");
 const ResetToken = require("../models/resetToken.model");
 const sendEmail = require("../utils/sendEmail");
 
