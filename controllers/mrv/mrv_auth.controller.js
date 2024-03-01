@@ -21,14 +21,24 @@ const register = async (req, res) => {
       emailVerificationCodeExpiration: Date.now() + 600000,
       isProjectDeveloper: true,
     });
+
+    let verifyToken = crypto.randomBytes(32).toString("hex");
+    const hash = await bcrypt.hash(verifyToken, 10);
+    mrvUser.verificationToken = hash;
     await mrvUser.save();
-    sendEmail(mrvUser.email, "Email Verification Link Sent", {
-      name: mrvUser.firstname,
-      emailVerificationCode,
-    });
+    const welcomeLink = `${process.env.CLIENT_URL}/mrvEmailVerify?token=${verifyToken}`;
+    sendEmail(
+      mrvUser.email,
+      "Welcome to Agrify",
+      {
+        name: mrvUser.firstname,
+        welcomeLink,
+      },
+      "./email/template/welcome.handlebars"
+    );
     res.status(201).json({
       message: "MRV Account Created!",
-      data: { emailVerificationCode },
+      data: null,
     });
     // res.status(201).json({ message: "MRV User Account Created!" });
   } catch (error) {
@@ -67,6 +77,24 @@ const generateOtp = async (req, res) => {
   } catch (error) {}
 };
 
+const verifyEmailWithToken = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const user = await MrvUser.findOne({ verificationToken: token });
+    if (user) {
+      user.isEmailVerified = true;
+      user.verificationToken = undefined;
+      await user.save();
+    }
+
+    res
+      .status(201)
+      .json({ mrvUser: user, message: "Email Verified Successfully" });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const verifyEmailWithCode = async (req, res) => {
   const { emailVerificationCode } = req.body;
   try {
@@ -89,4 +117,4 @@ const verifyEmailWithCode = async (req, res) => {
   }
 };
 
-module.exports = { register, login, verifyEmailWithCode };
+module.exports = { register, login, verifyEmailWithCode, verifyEmailWithToken };

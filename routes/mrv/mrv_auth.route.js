@@ -3,6 +3,7 @@ const {
   register,
   login,
   verifyEmailWithCode,
+  verifyEmailWithToken,
 } = require("../../controllers/mrv/mrv_auth.controller");
 const {
   validateRequest,
@@ -19,5 +20,6 @@ router.post(
   validateRequest(emailVerificationSchema),
   verifyEmailWithCode
 );
+router.post("/verify-email-token", verifyEmailWithToken);
 
 module.exports = router;

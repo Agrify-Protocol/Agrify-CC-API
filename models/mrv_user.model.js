@@ -13,6 +13,7 @@ const mrvUserSchema = new Schema(
     isFarmer: { type: Boolean, default: false },
     isVerifier: { type: Boolean, default: false },
     isEmailVerified: { type: Boolean, default: false },
+    verificationToken: { type: String },
   },
   {
     timestamps: true,
