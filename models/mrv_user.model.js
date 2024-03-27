@@ -14,6 +14,7 @@ const mrvUserSchema = new Schema(
     isVerifier: { type: Boolean, default: false },
     isEmailVerified: { type: Boolean, default: false },
     verificationToken: { type: String },
+    profileImageUrl: { type: String },
   },
   {
     timestamps: true,
@@ -27,5 +28,9 @@ const mrvUserSchema = new Schema(
     },
   }
 );
+
+mrvUserSchema.virtual("isOnboardingComplete").get(function () {
+  return !!this.firstname && !!this.lastname && !!this.profileImageUrl;
+});
 
 module.exports = mongoose.model("MrvUser", mrvUserSchema);
