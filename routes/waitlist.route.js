@@ -1,8 +1,12 @@
-const express = require('express');
+const express = require("express");
 
-const addUsertoWaitlist = require('../controllers/waitlist.controller');
+const {
+  addUsertoWaitlist,
+  getWaitlist,
+} = require("../controllers/waitlist.controller");
 const router = express.Router();
 
-router.post('/waitlist', addUsertoWaitlist);
+router.get("/", getWaitlist);
+router.post("/join", addUsertoWaitlist);
 
 module.exports = router;
