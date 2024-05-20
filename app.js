@@ -8,6 +8,7 @@ const profileRoutes = require("./routes/profile.route");
 const adminRoutes = require("./routes/admin.route");
 const contactRoutes = require("./routes/contact.route");
 const demoRequestRoutes = require("./routes/demorequest.route");
+const waitlistRoutes = require("./routes/waitlist.route");
 const mrvAuthRoutes = require("./routes/mrv/mrv_auth.route");
 const mrvProfileRoutes = require("./routes/mrv/mrv_profile.route");
 const multer = require("multer");
@@ -37,6 +38,7 @@ app.use("/api/v1", profileRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/contact", contactRoutes);
 app.use("/api/v1/demo-requests", demoRequestRoutes);
+app.use("/api/v1/waitlist", waitlistRoutes);
 app.use("/api/v1/mrv/auth/", mrvAuthRoutes);
 app.use("/api/v1/mrv/profile", mrvProfileRoutes);
 
