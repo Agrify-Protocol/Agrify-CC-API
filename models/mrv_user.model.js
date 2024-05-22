@@ -15,6 +15,7 @@ const mrvUserSchema = new Schema(
     isEmailVerified: { type: Boolean, default: false },
     verificationToken: { type: String },
     profileImageUrl: { type: String },
+    accountID: { type: String },
   },
   {
     timestamps: true,
