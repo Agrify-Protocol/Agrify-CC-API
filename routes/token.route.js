@@ -1,14 +1,16 @@
 const express = require("express");
 
+
 const {
   createToken,
-  getAllTokens,
+  getMyTokens,
   getToken,
 } = require("../controllers/token.controller");
+const authMiddleware = require("../middleware/auth");
 const router = express.Router();
 
-router.get("/:tokenSymbol", getToken);
-router.get("/", getAllTokens);
-router.post("/", createToken);
+router.get("/:tokenSymbol", authMiddleware, getToken);
+router.get("/", authMiddleware, getMyTokens);
+router.post("/", authMiddleware, createToken);
 
 module.exports = router;

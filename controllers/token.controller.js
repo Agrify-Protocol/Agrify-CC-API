@@ -1,11 +1,21 @@
 const Token = require("../models/token.model");
 const MrvUser = require("../models/mrv_user.model");
 const hederaService = require("../hedera/service/createToken.js");
+const authMiddleWare = require("../middleware/auth")
 
-const getAllTokens = async (req, res) => {
+// const getAllTokens = async (req, res) => {
+//   try {
+//     const result = await Token.find({}).sort({ tokenName: 1 }).exec();
+//     res.status(200).json({ message: "Tokens", data: result });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+const getMyTokens = async (req, res) => {
   try {
-    const result = await Token.find({}).sort({ tokenName: 1 }).exec();
-    res.status(200).json({ message: "Tokens", data: result });
+    const result = await Token.find({tokenOwner: req.userId}).sort({ tokenName: 1 }).exec();
+    res.status(200).json({ message: "My tokens", data: result });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -27,15 +37,16 @@ res.status(200).json(token);
 
 const createToken = async (req, res) => {
   try {
-    const { tokenName, tokenSymbol, tokenOwner, initialSupply } =
+    const { tokenName, tokenSymbol, initialSupply } =
       req.body;
-    const user = await MrvUser.findOne({ email: tokenOwner });
+      const tokenOwner = req.userId;
+    const user = await MrvUser.findOne({ _id: tokenOwner });
 
 
-    if (!user) {
-      res.status(400).json({ message: "No user found with email: " + tokenOwner });
-    }
-    else if (!user.isFarmer){
+    // if (!user) {
+    //   res.status(400).json({ message: "No user found with id: " + tokenOwner });
+    // }
+    if (!user.isFarmer){
       res.status(400).json({ message: "Only farmers can own tokens" });
     }
 
@@ -55,6 +66,7 @@ const createToken = async (req, res) => {
 
 module.exports = {
   createToken,
-  getAllTokens,
+  // getAllTokens,
+  getMyTokens,
   getToken
 };

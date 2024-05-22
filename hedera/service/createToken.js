@@ -1,6 +1,6 @@
-const {TokenCreateTransaction, TokenType, TokenSupplyType} = require("@hashgraph/sdk");
+const {TokenCreateTransaction, TokenType, TokenSupplyType, PrivateKey} = require("@hashgraph/sdk");
 const { myAccountId, myPrivateKey } = require("../config/config.js");
-const { client, newAccountPrivateKey } = require("../client/client.js")
+const { client } = require("../client/client.js")
 // const { Client, PrivateKey, AccountCreateTransaction, AccountBalanceQuery, Hbar, TransferTransaction } = require("@hashgraph/sdk");
 
 // CREATE FUNGIBLE TOKEN (STABLECOIN)
@@ -17,7 +17,7 @@ const createHederaToken = async(tokenCreateRequest) => {
 	.freezeWith(client);
 
 //SIGN WITH TREASURY KEY
-let tokenCreateSign = await tokenCreateTx.sign(newAccountPrivateKey);
+let tokenCreateSign = await tokenCreateTx.sign(PrivateKey.generateED25519());
 
 //SUBMIT THE TRANSACTION
 let tokenCreateSubmit = await tokenCreateSign.execute(client);
