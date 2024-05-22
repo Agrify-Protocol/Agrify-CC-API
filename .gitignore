@@ -147,3 +147,5 @@ dist
 uploads/
 
 # End of https://www.toptal.com/developers/gitignore/api/node
+.idea/
+.vscode/launch.json
