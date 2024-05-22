@@ -3,10 +3,17 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const MrvUser = require("../../models/mrv_user.model");
 const sendEmail = require("../../utils/sendEmail");
+const hederaService = require("../../hedera/service/createAccount.js");
+
 
 const register = async (req, res) => {
   try {
     const { firstname, lastname, email, password } = req.body;
+    const user = await MrvUser.findOne({ email });
+
+    if (user){
+      return res.status(400).json({ eror: "User already exists!" });
+    }
 
     const hashPassword = await bcrypt.hash(password, 10);
     const emailVerificationCode = Math.floor(
@@ -19,12 +26,14 @@ const register = async (req, res) => {
       password: hashPassword,
       emailVerificationCode,
       emailVerificationCodeExpiration: Date.now() + 600000,
-      isProjectDeveloper: true,
+      isFarmer: true,
     });
 
     let verifyToken = crypto.randomBytes(32).toString("hex");
     const hash = await bcrypt.hash(verifyToken, 10);
     mrvUser.verificationToken = hash;
+    const hederaAccountID = await hederaService.createHederaAccount();
+    mrvUser.accountID = hederaAccountID;
     await mrvUser.save();
     const welcomeLink = `${process.env.CLIENT_URL}/mrvEmailVerify?token=${verifyToken}`;
     sendEmail(
