@@ -10,7 +10,7 @@ const mrvUserSchema = new Schema(
     emailVerificationCode: { type: String },
     emailVerificationCodeExpiration: { type: String },
     isProjectDeveloper: { type: Boolean, default: false },
-    isFarmer: { type: Boolean, default: false },
+    isFarmer: { type: Boolean, default: true },
     isVerifier: { type: Boolean, default: false },
     isEmailVerified: { type: Boolean, default: false },
     verificationToken: { type: String },
