@@ -78,6 +78,10 @@ const projectSchema = new Schema (
         supportingDocument: {
             type: String
         },
+        projectToken: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Token",
+        },
     },
     {timestamps: true}
 );
