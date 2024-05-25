@@ -26,7 +26,6 @@ const register = async (req, res) => {
       password: hashPassword,
       emailVerificationCode,
       emailVerificationCodeExpiration: Date.now() + 600000,
-      isFarmer: true,
     });
 
     let verifyToken = crypto.randomBytes(32).toString("hex");

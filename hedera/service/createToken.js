@@ -4,13 +4,14 @@ const { client } = require("../client/client.js")
 // const { Client, PrivateKey, AccountCreateTransaction, AccountBalanceQuery, Hbar, TransferTransaction } = require("@hashgraph/sdk");
 
 // CREATE FUNGIBLE TOKEN (STABLECOIN)
-const createHederaToken = async(tokenCreateRequest) => {
+const createHederaToken = async(tokenName, tokenSymbol, initialSupply) => {
     let tokenCreateTx = await new TokenCreateTransaction()
-	.setTokenName(tokenCreateRequest.tokenName)
-	.setTokenSymbol(tokenCreateRequest.tokenSymbol)
+	.setTokenName(tokenName)
+	.setTokenSymbol(tokenSymbol)
 	.setTokenType(TokenType.FungibleCommon)
+    //TODO: Set decimal places depending on purchase model
 	.setDecimals(2)
-	.setInitialSupply(tokenCreateRequest.initialSupply)
+	.setInitialSupply(initialSupply)
 	.setTreasuryAccountId(myAccountId)
 	.setSupplyType(TokenSupplyType.Infinite)
 	// .setSupplyKey(supplyKey)

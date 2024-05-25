@@ -1,6 +1,7 @@
 const Token = require("../models/token.model");
 const MrvUser = require("../models/mrv_user.model");
 const hederaService = require("../hedera/service/createToken.js");
+const tokenService = require("../service/tokenService.js");
 const authMiddleWare = require("../middleware/auth")
 
 // const getAllTokens = async (req, res) => {
@@ -51,12 +52,14 @@ const createToken = async (req, res) => {
     }
 
     else {
-      const token = await Token.create({
-        tokenName, tokenSymbol, tokenOwner, initialSupply,
-      });
-      const tokenID = await hederaService.createHederaToken(req.body);
-      token.tokenId = tokenID;
-      await token.save();
+      // const token = await Token.create({
+      //   tokenName, tokenSymbol, tokenOwner, initialSupply,
+      // });
+      // const tokenID = await hederaService.createHederaToken(req.body);
+      // token.tokenId = tokenID;
+      // await token.save();
+      const token = await tokenService.createToken(tokenName, tokenSymbol, initialSupply);
+      if (!token) throw new Error("Error creating token");
       res.status(201).json({token});
     }
   } catch (error) {

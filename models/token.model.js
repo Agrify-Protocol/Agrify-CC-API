@@ -3,7 +3,8 @@ const Schema = mongoose.Schema;
 
 const tokenSchema = new Schema(
   {
-    tokenId: { type: String },
+    tokenId: { type: String, required: true },
+    projectId: { type: String, required: true },
     tokenName: { type: String, required: true },
     tokenSymbol: { type: String, required: true },
     tokenOwner: { type: String, required: true },

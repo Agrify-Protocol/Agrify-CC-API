@@ -2,6 +2,8 @@ const Project = require('../models/project.model');
 const Tag = require('../models/tag.model');
 const cloudinary = require('../utils/cloudinary');
 const moment = require('moment');
+const tokenService = require("../service/tokenService.js");
+const authMiddleWare = require("../middleware/auth")
 
 const getProjectById = async (req, res) => {
     const {id} = req.params;
@@ -49,7 +51,7 @@ const getProjects = async (req, res) => {
                 path:'tags',
                 select: tagFields
             });
-        res.status(201).json(projects);
+        res.status(200).json(projects);
     } catch (error) {
         console.log('Error fetching projects:', error);
         res.status(500).json({error: 'Internal Server Error'});
@@ -88,12 +90,17 @@ const createProject = async (req, res) => {
          
         const {
             title, description, price, availableTonnes, tags,minimumPurchaseTonnes, location, countryOfOrigin,creditStartDate,creditEndDate,projectProvider, projectWebsite,blockchainAddress, typeOfProject, certification, certificationURL, certificateCode
-            } = req.body;
+            } = req.body;            
             
 
         const project = await Project.create({
             title,description,price: parseFloat(price),availableTonnes: parseInt(availableTonnes),images: uploadedImages,projectId, minimumPurchaseTonnes: parseInt(minimumPurchaseTonnes),location, countryOfOrigin, creditStartDate: convertStringToDate(creditStartDate),creditEndDate: convertStringToDate(creditEndDate),coverImage: coverImage, projectProvider, projectWebsite,blockchainAddress, typeOfProject, certification, certificationURL, certificateCode, supportingDocument: supportingDocumentLink
         });
+
+        //Create token for project
+        const token = await tokenService.createToken(project.projectId, title, req.userId, availableTonnes * 100 );
+        if (!token) throw new Error("Error creating project token");
+        project.projectToken = token;
         
         // find existing tags by their IDs
         const existingTags = await Tag.find({_id: {$in: tags}});
