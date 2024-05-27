@@ -30,6 +30,7 @@ const farmSchema = new Schema (
         long: {
             type: String,
         },
+        //TODO: Add projects Object
     },
     {timestamps: true}
 );
