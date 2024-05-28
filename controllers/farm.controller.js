@@ -21,10 +21,9 @@ const createFarm = async (req, res) => {
             name, country, address, city, state
             } = req.body;            
             
-        //Map coordinates
+        //TODO: Geolocation API
         const farmLocation = "";
 
-        //Create farm
         const farm = await Farm.create({
             name, country, address, city, state
         });
