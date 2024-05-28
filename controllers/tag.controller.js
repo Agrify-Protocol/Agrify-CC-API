@@ -203,7 +203,10 @@ const seedTags = async (req, res) => {
       },
     ];
 
-    await Tag.insertMany(tags);
+    // await Tag.insertMany(tags);
+    for (const tag of tags) {
+      await Tag.updateOne({ name: tag.name }, { $set: tag }, { upsert: true });
+    }
     res.status(201).json({ message: "Tags seeded successfully" });
   } catch (error) {
     res.status(500).json({ message: `Error Seeding Tags: ${error.message}` });
