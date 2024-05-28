@@ -48,11 +48,19 @@ const login = async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials!" });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY);
-    user.isAdmin = true;
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: "1h",
+    });
+    const refreshToken = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_REFRESH_KEY,
+      { expiresIn: "7d" }
+    );
+    // user.isAdmin = true;
     res.json({
       user,
       token,
+      refreshToken,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -120,9 +128,31 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const refreshtoken = async (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+    return res.status(401).json({ error: "Refresh Token Required" });
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_KEY);
+    const userId = decoded.userId;
+
+    const newAccessToken = jwt.sign({ userId }, process.env.JWT_SECRET_KEY, {
+      expiresIn: "1h",
+    });
+    res.json({
+      token: newAccessToken,
+    });
+  } catch (error) {
+    return res.status(403).json({ error: "Invalid or Expired Refresh Token" });
+  }
+};
+
 module.exports = {
   register,
   login,
   requestResetPassword,
   resetPassword,
+  refreshtoken,
 };
