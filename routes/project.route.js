@@ -7,6 +7,7 @@ const {
   getProjectById,
   getProjects,
   seedProjects,
+  resetSeedProjects,
 } = require("../controllers/project.controller");
 
 const router = express.Router();
@@ -25,5 +26,6 @@ router.post(
 router.get("/projects/:id", authMiddleware, getProjectById);
 
 router.post("/seed-projects", seedProjects);
+router.post("/reset-seed-projects", resetSeedProjects);
 
 module.exports = router;
