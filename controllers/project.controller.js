@@ -109,6 +109,7 @@ const createProject = async (req, res) => {
       description,
       price,
       availableTonnes,
+      totalTonnes,
       tags,
       minimumPurchaseTonnes,
       location,
@@ -129,6 +130,7 @@ const createProject = async (req, res) => {
       description,
       price: parseFloat(price),
       availableTonnes: parseInt(availableTonnes),
+      totalTonnes: parseInt(totalTonnes),
       images: uploadedImages,
       projectId,
       minimumPurchaseTonnes: parseInt(minimumPurchaseTonnes),
@@ -189,6 +191,21 @@ const seedProjects = async (req, res) => {
   }
 };
 
+const resetSeedProjects = async (req, res) => {
+  const count = 10;
+  const projects = await generateProjectData(count);
+  try {
+    await Project.deleteMany({});
+    await Project.insertMany(projects);
+
+    return res
+      .status(201)
+      .json({ messge: "Project Database has been reset!", count });
+  } catch (error) {
+    console.log("Error reseting projects list: ", error);
+  }
+};
+
 const generateProjectData = async (numProjects) => {
   const projects = [];
 
@@ -199,19 +216,25 @@ const generateProjectData = async (numProjects) => {
       description: faker.lorem.paragraphs(2),
       price: faker.number.int({ min: 100, max: 1000 }),
       availableTonnes: faker.number.int({ min: 1, max: 1000 }),
+      totalTonnes: faker.number.int({ min: 100, max: 14000 }),
       tags: tags,
-      images: [faker.image.url(), faker.image.url()],
+      images: [
+        { image: faker.image.url(), description: faker.lorem.sentence() },
+        { image: faker.image.url(), description: faker.lorem.sentence() },
+      ],
       coverImage: faker.image.url(),
       projectId: `PRJ${faker.number.int({ min: 100, max: 9999 })}`,
       minimumPurchaseTonnes: faker.number.int({ min: 1, max: 20 }),
       location: faker.location.city(),
+      latitude: faker.location.latitude(),
+      longitude: faker.location.longitude(),
       countryOfOrigin: faker.location.country(),
       projectProvider: faker.company.buzzPhrase(),
       projectWebsite: faker.internet.url(),
       blockchainAddress: faker.finance.ethereumAddress(),
       typeOfProject: "Environmental",
       certification: "ISO 140001",
-      certificationURL: faker.internet.url,
+      certificationURL: faker.internet.url(),
       certificateCode: `ISO140001-${faker.date.future().getFullYear()}`,
       creditStartDate: faker.date.future(),
       creditEndDate: faker.date.future(),
@@ -229,4 +252,10 @@ const getRandomTags = async () => {
   return tags.map((tag) => tag._id);
 };
 
-module.exports = { createProject, getProjects, getProjectById, seedProjects };
+module.exports = {
+  createProject,
+  getProjects,
+  getProjectById,
+  seedProjects,
+  resetSeedProjects,
+};
