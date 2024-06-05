@@ -56,7 +56,14 @@ const getProjects = async (req, res) => {
       });
     const total = await Project.countDocuments();
     const totalPages = Math.ceil(total / limit);
-    res.status(200).json({ projects, total, page, totalPages });
+
+    const nextPage = page < totalPages ? page + 1 : null;
+    const prevPage = page < 1 ? page - 1 : null;
+    //const response = await fetch(`/api/projects?page=${page}&limit=${limit}&sortBy=${sortBy}`);
+
+    res
+      .status(200)
+      .json({ projects, total, page, totalPages, nextPage, prevPage });
   } catch (error) {
     console.log("Error fetching projects:", error);
     res.status(500).json({ error: "Internal Server Error" });
