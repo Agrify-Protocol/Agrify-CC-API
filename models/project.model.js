@@ -22,6 +22,11 @@ const projectSchema = new Schema(
       required: true,
       min: [0, "At least 1"],
     },
+    totalTonnes: {
+      type: Number,
+      required: true,
+      min: [0, "At least 1"],
+    },
     tags: [
       {
         type: Schema.Types.ObjectId,
@@ -48,6 +53,14 @@ const projectSchema = new Schema(
     },
     location: {
       type: String,
+    },
+    latitude: {
+      type: Number,
+      // required: true
+    },
+    longitude: {
+      type: Number,
+      // required: true,
     },
     countryOfOrigin: {
       type: String,
