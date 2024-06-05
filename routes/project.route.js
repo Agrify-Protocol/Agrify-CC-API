@@ -11,7 +11,7 @@ const {
 
 const router = express.Router();
 
-router.get("/projects", getProjects);
+router.get("/projects", authMiddleware, getProjects);
 router.post(
   "/projects",
   authMiddleware,
@@ -22,7 +22,7 @@ router.post(
   ]),
   createProject
 );
-router.get("/projects/:id", getProjectById);
+router.get("/projects/:id", authMiddleware, getProjectById);
 
 router.post("/seed-projects", seedProjects);
 
