@@ -43,7 +43,7 @@ const getProjects = async (req, res) => {
       sortCriteria = {};
     }
 
-    const projectFields = "title description price availableTonnes";
+    const projectFields = "title coverImage";
     const tagFields = "icon";
     const skip = (page - 1) * limit;
     const projects = await Project.find({}, projectFields)
@@ -54,7 +54,9 @@ const getProjects = async (req, res) => {
         path: "tags",
         select: tagFields,
       });
-    res.status(200).json(projects);
+    const total = await Project.countDocuments();
+    const totalPages = Math.ceil(total / limit);
+    res.status(200).json({ projects, total, page, totalPages });
   } catch (error) {
     console.log("Error fetching projects:", error);
     res.status(500).json({ error: "Internal Server Error" });
