@@ -30,6 +30,14 @@ const farmSchema = new Schema (
         long: {
             type: String,
         },
+        farmerID: {
+            type: String,
+        },
+        projects: [{
+            type: Schema.Types.ObjectId,
+            ref:'Project'
+        }],
+
         //TODO: Add projects Object
     },
     {timestamps: true}

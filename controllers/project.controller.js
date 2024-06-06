@@ -9,7 +9,7 @@ const { faker } = require("@faker-js/faker");
 const getProjectById = async (req, res) => {
   const { id } = req.params;
   try {
-    const project = await Project.findById(id).populate({ path: "tags" });
+    const project = await Project.findById(id).populate({ path: "tags" }).populate({path: "projectToken"});
     if (!project) {
       return res
         .status(404)
@@ -43,7 +43,7 @@ const getProjects = async (req, res) => {
       sortCriteria = {};
     }
 
-    const projectFields = "title description price availableTonnes";
+    const projectFields = "title description price availableTonnes projectToken"; //TODO Add token to getProjects
     const tagFields = "icon";
     const skip = (page - 1) * limit;
     const projects = await Project.find({}, projectFields)
@@ -54,6 +54,7 @@ const getProjects = async (req, res) => {
         path: "tags",
         select: tagFields,
       });
+      console.log(projects);
     res.status(200).json(projects);
   } catch (error) {
     console.log("Error fetching projects:", error);
@@ -80,20 +81,20 @@ const createProject = async (req, res) => {
     let uploadedImages = [];
     let coverImage;
     let supportingDocumentLink;
-    if (req.files) {
-      for (const file of req.files.images) {
-        const uploadResult = await cloudinary.v2.uploader.upload(file.path);
-        uploadedImages.push(uploadResult.secure_url);
-      }
-      const coverImageUpload = await cloudinary.v2.uploader.upload(
-        req.files.cover[0].path
-      );
-      coverImage = coverImageUpload.secure_url;
-      const supportingDocumentLinkUpload = await cloudinary.v2.uploader.upload(
-        req.files.supdoc[0].path
-      );
-      supportingDocumentLink = supportingDocumentLinkUpload.secure_url;
-    }
+    // if (req.files) {
+    //   for (const file of req.files.images) {
+    //     const uploadResult = await cloudinary.v2.uploader.upload(file.path);
+    //     uploadedImages.push(uploadResult.secure_url);
+    //   }
+    //   const coverImageUpload = await cloudinary.v2.uploader.upload(
+    //     req.files.cover[0].path
+    //   );
+    //   coverImage = coverImageUpload.secure_url;
+    //   const supportingDocumentLinkUpload = await cloudinary.v2.uploader.upload(
+    //     req.files.supdoc[0].path
+    //   );
+    //   supportingDocumentLink = supportingDocumentLinkUpload.secure_url;
+    // }
 
     const {
       title,
@@ -114,6 +115,15 @@ const createProject = async (req, res) => {
       certificationURL,
       certificateCode,
     } = req.body;
+
+    //Create token for project
+    const token = await tokenService.createToken(
+      projectId,
+      title,
+      req.userId,
+      availableTonnes * 100
+    );
+    if (!token) throw new Error("Error creating project token");
 
     const project = await Project.create({
       title,
@@ -136,17 +146,10 @@ const createProject = async (req, res) => {
       certificationURL,
       certificateCode,
       supportingDocument: supportingDocumentLink,
+      projectToken: token
     });
 
-    //Create token for project
-    const token = await tokenService.createToken(
-      project.projectId,
-      title,
-      req.userId,
-      availableTonnes * 100
-    );
-    if (!token) throw new Error("Error creating project token");
-    project.projectToken = token;
+    // project.set({projectToken: token});
 
     // find existing tags by their IDs
     const existingTags = await Tag.find({ _id: { $in: tags } });
