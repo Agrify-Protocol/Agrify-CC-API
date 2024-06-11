@@ -31,8 +31,11 @@ const register = async (req, res) => {
     let verifyToken = crypto.randomBytes(32).toString("hex");
     const hash = await bcrypt.hash(verifyToken, 10);
     mrvUser.verificationToken = hash;
-    const hederaAccountID = await hederaService.createHederaAccount();
-    mrvUser.accountID = hederaAccountID;
+    const [hederaAccountID, hederaPublicKey, hederaPrivateKey] = await hederaService.createHederaAccount();
+    mrvUser.hederaAccountID = hederaAccountID;
+    mrvUser.hederaPublicKey = hederaPublicKey;
+    //TODO: Encrypt
+    mrvUser.hederaPrivateKey = hederaPrivateKey;
     await mrvUser.save();
     const welcomeLink = `${process.env.CLIENT_URL}/mrvEmailVerify?token=${verifyToken}`;
     sendEmail(
@@ -46,7 +49,7 @@ const register = async (req, res) => {
     );
     res.status(201).json({
       message: "MRV Account Created!",
-      data: null,
+      data: mrvUser,
     });
     // res.status(201).json({ message: "MRV User Account Created!" });
   } catch (error) {

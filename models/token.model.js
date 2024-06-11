@@ -8,7 +8,11 @@ const tokenSchema = new Schema(
     tokenName: { type: String, required: true },
     tokenSymbol: { type: String, required: true },
     tokenOwner: { type: String, required: true },
-    initialSupply: { type: String, required: true },
+    totalTonnes: { type: Number, required: true },
+    availableTonnes: { type: Number, required: true },
+    associatedAccounts: [
+       { type: String }
+    ],
   },
   {
     timestamps: true,
@@ -18,6 +22,7 @@ const tokenSchema = new Schema(
         delete ret._id;
         delete ret.createdAt;
         delete ret.updatedAt;
+        delete ret.associatedAccounts;
       },
     },
   }

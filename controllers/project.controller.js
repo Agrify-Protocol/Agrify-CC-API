@@ -154,7 +154,8 @@ const createProject = async (req, res) => {
       project.projectId,
       title,
       req.userId,
-      availableTonnes * 100
+      totalTonnes,
+      availableTonnes
     );
     if (!token) throw new Error("Error creating project token");
     project.projectToken = token;
