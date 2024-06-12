@@ -1,5 +1,5 @@
-const { AccountCreateTransaction, PrivateKey, Hbar } = require("@hashgraph/sdk");
-const { myAccountId, myPrivateKey, initialHbarBalance } = require("../config/config.js");
+const { AccountCreateTransaction, PrivateKey, Hbar, HbarUnit } = require("@hashgraph/sdk");
+const { ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, initialHbarBalance } = require("../config/config.js");
 const { client } = require("../client/client.js")
 
 //Create new keys
@@ -18,8 +18,10 @@ const createHederaAccount = async () => {
 
         //Log the account ID
         console.log("The new account ID is: " + newAccountId);
+        console.log("Public key: " + newAccountPublicKey);
+        console.log("Private key: " + newAccountPrivateKey);
 
-        return newAccountId;
+        return [newAccountId, newAccountPublicKey, newAccountPrivateKey];
     }
 
     catch (error) {

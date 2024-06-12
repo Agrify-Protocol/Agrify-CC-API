@@ -15,7 +15,9 @@ const mrvUserSchema = new Schema(
     isEmailVerified: { type: Boolean, default: false },
     verificationToken: { type: String },
     profileImageUrl: { type: String },
-    accountID: { type: String },
+    hederaAccountID: { type: String },
+    hederaPublicKey: { type: String },
+    hederaPrivateKey: { type: String },
   },
   {
     timestamps: true,
@@ -25,6 +27,8 @@ const mrvUserSchema = new Schema(
         delete ret.password;
         delete ret.createdAt;
         delete ret.updatedAt;
+        delete ret.hederaPublicKey;
+        delete ret.hederaPrivateKey;
       },
     },
   }
