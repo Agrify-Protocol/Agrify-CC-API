@@ -11,7 +11,7 @@ const register = async (req, res) => {
     const { firstname, lastname, email, password } = req.body;
     const user = await MrvUser.findOne({ email });
 
-    if (user){
+    if (user) {
       return res.status(400).json({ eror: "User already exists!" });
     }
 
@@ -85,7 +85,7 @@ const generateOtp = async (req, res) => {
       { otp, otpExpiration: Date.now() + 600000 },
       { upsert: true, new: true }
     );
-  } catch (error) {}
+  } catch (error) { }
 };
 
 const verifyEmailWithToken = async (req, res) => {
