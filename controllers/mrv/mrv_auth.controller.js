@@ -5,7 +5,6 @@ const MrvUser = require("../../models/mrv_user.model");
 const sendEmail = require("../../utils/sendEmail");
 const hederaService = require("../../hedera/service/createAccount.js");
 
-
 const register = async (req, res) => {
   try {
     const { firstname, lastname, email, password } = req.body;
@@ -31,7 +30,8 @@ const register = async (req, res) => {
     let verifyToken = crypto.randomBytes(32).toString("hex");
     const hash = await bcrypt.hash(verifyToken, 10);
     mrvUser.verificationToken = hash;
-    const [hederaAccountID, hederaPublicKey, hederaPrivateKey] = await hederaService.createHederaAccount();
+    const [hederaAccountID, hederaPublicKey, hederaPrivateKey] =
+      await hederaService.createHederaAccount();
     mrvUser.hederaAccountID = hederaAccountID;
     mrvUser.hederaPublicKey = hederaPublicKey;
     //TODO: Encrypt
@@ -47,9 +47,10 @@ const register = async (req, res) => {
       },
       "./email/template/welcome.handlebars"
     );
+    const token = jwt.sign({ userId: mrvUser._id }, process.env.JWT_SECRET_KEY);
     res.status(201).json({
       message: "MRV Account Created!",
-      data: mrvUser,
+      data: { mrvUser, token },
     });
     // res.status(201).json({ message: "MRV User Account Created!" });
   } catch (error) {
@@ -85,7 +86,7 @@ const generateOtp = async (req, res) => {
       { otp, otpExpiration: Date.now() + 600000 },
       { upsert: true, new: true }
     );
-  } catch (error) { }
+  } catch (error) {}
 };
 
 const verifyEmailWithToken = async (req, res) => {
