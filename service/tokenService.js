@@ -9,7 +9,9 @@ const createToken = async (
   tokenName,
   tokenOwner,
   totalTonnes,
-  availableTonnes
+  availableTonnes,
+  minimumPurchaseTonnes,
+  price,
 ) => {
   try {
     const tokenSymbol = `${projectId}-AGT`;
@@ -27,6 +29,8 @@ const createToken = async (
       tokenOwner,
       totalTonnes,
       availableTonnes,
+      minimumPurchaseTonnes,
+      price,
     });
     // token.tokenId = tokenID;
     await token.save();
@@ -42,6 +46,43 @@ const getToken = async (tokenSymbol) => {
 
     if (!token) throw new Error("Unable to get token");
     return token;
+  } catch (error) {
+    console.error({ error: error.message });
+  }
+};
+
+const getTokenByID = async (tokenSymbol) => {
+  try {
+    const token = await Token.findOne({ tokenId: tokenSymbol });
+
+    if (!token) throw new Error("Unable to get token");
+    return token;
+  } catch (error) {
+    console.error({ error: error.message });
+  }
+};
+
+const queryTokenBalance = async (accountID) => {
+  try {
+    const tokens = await hederaService.queryTokenBalance(accountID);
+    if (!tokens) throw new Error("Unable to get token");
+
+    const tokenList = tokens.tokens;
+    const mp = new Map(tokenList);
+    // for (const token in object) {
+    //   if (Object.hasOwnProperty.call(object, token)) {
+    //     const element = object[token];
+        
+    //   }
+    // }
+    await mp.forEach((balance, tokenID) => {
+      const token = getTokenByID(tokenID);
+      token.balance = balance;
+      token.save();
+    });
+    return token;
+
+    // return receipt;
   } catch (error) {
     console.error({ error: error.message });
   }
@@ -103,37 +144,40 @@ const purchaseToken = async (
 
     // const senderID = mrvUser.hederaAccountID;
 
-    //TODO: Insufficient balance
 
-    //TODO: Insufficient amount in circulation
-    const recipientUser = await MrvUser.findOne({ _id: recipientID });
+    {
+      const recipientUser = await MrvUser.findOne({ _id: recipientID });
 
-    if (!token.associatedAccounts.includes(recipientUser.hederaAccountID)) {
-      const associationReceipt = await hederaService.associateHederaToken(
-        tokenID,
-        recipientUser
-      );
-      if (!associationReceipt) {
-        throw new Error("Unable to associate token to recipient");
-      } else {
-        await token.associatedAccounts.push(recipientUser.hederaAccountID);
-        await token.save();
+      //Associate token to user
+      if (!token.associatedAccounts.includes(recipientUser.hederaAccountID)) {
+        const associationReceipt = await hederaService.associateHederaToken(
+          tokenID,
+          recipientUser
+        );
+        if (!associationReceipt) {
+          throw new Error("Unable to associate token to recipient");
+        } else {
+          await token.associatedAccounts.push(recipientUser.hederaAccountID);
+          await token.save();
+        }
       }
+
+      //Make transfer
+      const receipt = await hederaService.transferHederaToken(
+        tokenID,
+        amount, // senderID,
+        recipientUser.hederaAccountID
+      );
+
+      //TODO: Transaction receipt
+      if (!receipt) throw new Error("Error transferring token");
+
+      token.availableTonnes -= amount;
+
+      //TODO: Update project tonnes
+      await token.save();
+      return token;
     }
-    const receipt = await hederaService.transferHederaToken(
-      tokenID,
-      amount, // senderID,
-      recipientUser.hederaAccountID
-    );
-
-    //TODO: Transaction receipt
-    if (!receipt) throw new Error("Error transferring token");
-
-    token.availableTonnes -= amount;
-
-    //TODO: Update project tonnes
-    await token.save();
-    return token;
   } catch (error) {
     console.error({ error: error.message });
     return error;
@@ -143,7 +187,9 @@ const purchaseToken = async (
 module.exports = {
   createToken,
   getToken,
+  getTokenByID,
   burnToken,
   associateToken,
   purchaseToken,
+  queryTokenBalance,
 };
