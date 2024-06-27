@@ -1,4 +1,5 @@
 const Transaction = require("../models/transaction.model");
+const walletService = require("../service/walletService.js");
 const authMiddleWare = require("../middleware/auth")
 
 // const getAllTokens = async (req, res) => {
@@ -12,10 +13,11 @@ const authMiddleWare = require("../middleware/auth")
 
 const getTransactionHistory = async (req, res) => {
   try {
-    const transactions = await Transaction.find({ userId: req.userId })
+    const wallet = await walletService.getMyWallet(req.userId);
+    const transactions = await Transaction.find({ walletId: wallet.id })
     // .populate({path:'trnxType'})
     // .populate(['trnxType', 'amount', 'reference'])
-    // .sort( {updatedAt: -1});
+    .sort( {updatedAt: -1});
     
     // const exisitingWallet = await Wallet.findOne({ userId: req.userId });
 

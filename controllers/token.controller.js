@@ -2,6 +2,7 @@ const Token = require("../models/token.model");
 const MrvUser = require("../models/mrv_user.model");
 const hederaService = require("../hedera/service/token.js");
 const tokenService = require("../service/tokenService.js");
+const walletService = require("../service/walletService.js");
 const authMiddleWare = require("../middleware/auth")
 
 // const getAllTokens = async (req, res) => {
@@ -96,8 +97,16 @@ const purchaseToken = async (req, res) => {
     // else {
 
     //TODO: Insufficient balance
-
     const token = await tokenService.getToken(tokenSymbol);
+
+    const debitAmount = Number(amount * token.price);
+
+    const wallet = await walletService.getMyWallet(req.userId);
+    if (Number(wallet.balance) < debitAmount) {
+      return res.status(400).json({
+        error: `Insufficient balance`
+      });
+    }
 
     if (amount < token.minimumPurchaseTonnes) {
       return res.status(400).json({

@@ -1,8 +1,25 @@
-const Token = require("../models/token.model");
-const hederaService = require("../hedera/service/token.js");
 const Wallet = require("../models/wallet.model");
+const Token = require("../models/token.model");
 const Transaction = require("../models/transaction.model");
-require("dotenv").config();
+
+const getMyWallet = async (userId) => {
+  try {
+    const wallet = await Wallet.findOne({ userId: userId }).populate({
+      path: "tokens",
+      populate: {
+        path: "token",
+        select: ["tokenSymbol", "tokenName"],
+      },
+    });
+
+    if (!wallet) {
+      throw new Error(`No wallet found for user ${req.userId}`);
+    }
+    return wallet;
+  } catch (error) {
+    console.error({ error: error.message });
+  }
+};
 
 const createWallet = async (userId) => {
   try {
@@ -35,23 +52,24 @@ const deleteWallet = async (userId) => {
 };
 
 const creditWallet = async (
-  amount, 
-  userId, 
-  purpose, 
-  reference ) => {
-  const wallet = await Wallet.findOne({ userId });
+  amount,
+  walletId,
+  purpose) => {
+  const wallet = await Wallet.findOne({ _id: walletId });
   if (!wallet) {
     //TODO: Create wallet
-    throw new Error(`No wallet found for user ${userId}`);
-    }
+    throw new Error(`Wallet ${walletId} not found`);
+  }
 
-  const updatedWallet = await Wallet.findOneAndUpdate({userId}, { $inc: { balance: amount } });
+  const updatedWallet = await Wallet.findOneAndUpdate({ _id: walletId }, { $inc: { balance: amount } });
+
+  const reference = generateUniqueRef();
 
   const transaction = await Transaction.create([{
     trnxType: 'CR',
     purpose,
     amount,
-    userId,
+    walletId,
     reference,
     balanceBefore: Number(wallet.balance),
     balanceAfter: Number(wallet.balance) + Number(amount),
@@ -62,27 +80,61 @@ const creditWallet = async (
 
 }
 
+const addTokenToWallet = async (
+  walletId,
+  tokenId,
+  amount) => {
+  const wallet = await Wallet.findOne({ _id: walletId });
+  const token = await Token.findOne({ _id: tokenId });
+  const walletTokens = wallet.tokens;
+  // if (wallet.tokens.includes({token})){
+  const existingToken = walletTokens.findIndex(t => t.token.toHexString() == tokenId);
+
+  if (existingToken == -1) {
+    await wallet.tokens.push({ token: token, amount: amount });
+    await wallet.save();
+  }
+  else {
+    wallet.tokens[existingToken].amount += amount;
+    await wallet.save();
+  }
+  // existingToken.amount += amount;
+  // const updatedWallet = await Wallet.findOneAndUpdate({_id: walletId}, { $inc: { balance: amount } });
+  return existingToken;
+}
+
+function generateUniqueRef() {
+  const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let code = "";
+  for (let i = 0; i < 8; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    code += characters[randomIndex];
+  }
+  return code;
+}
+
 const debitWallet = async (
-  amount, 
-  userId, 
-  purpose, 
-  reference) => {
-  const wallet = await Wallet.findOne({ userId });
+  amount,
+  walletId,
+  purpose) => {
+  const wallet = await Wallet.findOne({ _id: walletId });
   if (!wallet) {
-    throw new Error(`No wallet found for user ${userId}`);
-    }
+    throw new Error(`Wallet ${walletId} not found`);
+  }
 
-    if (Number(wallet.balance) < amount) {
-      throw new Error("Insufficient balance");
-    }
+  if (Number(wallet.balance) < amount) {
+    throw new Error("Insufficient balance");
+  }
 
-  const updatedWallet = await Wallet.findOneAndUpdate({userId}, { $inc: { balance: -amount } });
+  const updatedWallet = await Wallet.findOneAndUpdate({ _id: walletId }, { $inc: { balance: -amount } });
+
+  const reference = generateUniqueRef();
 
   const transaction = await Transaction.create([{
     trnxType: 'DR',
     purpose,
     amount,
-    userId,
+    walletId,
     reference,
     balanceBefore: Number(wallet.balance),
     balanceAfter: Number(wallet.balance) - Number(amount),
@@ -94,62 +146,11 @@ const debitWallet = async (
 }
 
 
-
-  // const purchaseToken = async (
-  //   tokenSymbol,
-  //   amount, //senderID,
-  //   recipientID
-  // ) => {
-  //   try {
-  //     const token = await getToken(tokenSymbol);
-
-  //     const tokenID = token.tokenId;
-
-  //     // const senderID = mrvUser.hederaAccountID;
-
-
-  //     {
-  //       const recipientUser = await MrvUser.findOne({ _id: recipientID });
-
-  //       //Associate token to user
-  //       if (!token.associatedAccounts.includes(recipientUser.hederaAccountID)) {
-  //         const associationReceipt = await hederaService.associateHederaToken(
-  //           tokenID,
-  //           recipientUser
-  //         );
-  //         if (!associationReceipt) {
-  //           throw new Error("Unable to associate token to recipient");
-  //         } else {
-  //           await token.associatedAccounts.push(recipientUser.hederaAccountID);
-  //           await token.save();
-  //         }
-  //       }
-
-  //       //Make transfer
-  //       const receipt = await hederaService.transferHederaToken(
-  //         tokenID,
-  //         amount, // senderID,
-  //         recipientUser.hederaAccountID
-  //       );
-
-  //       //TODO: Transaction receipt
-  //       if (!receipt) throw new Error("Error transferring token");
-
-  //       token.availableTonnes -= amount;
-
-  //       //TODO: Update project tonnes
-  //       await token.save();
-  //       return token;
-  //     }
-  //   } catch (error) {
-  //     console.error({ error: error.message });
-  //     return error;
-  //   }
-  // };
-
-  module.exports = {
-    deleteWallet,
-    createWallet,
-    creditWallet,
-    debitWallet,
-  };
+module.exports = {
+  getMyWallet,
+  deleteWallet,
+  createWallet,
+  creditWallet,
+  debitWallet,
+  addTokenToWallet,
+};

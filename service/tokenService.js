@@ -1,5 +1,6 @@
 const Token = require("../models/token.model");
 const hederaService = require("../hedera/service/token.js");
+const walletService = require("../service/walletService.js");
 const MrvUser = require("../models/mrv_user.model");
 require("dotenv").config();
 
@@ -162,12 +163,29 @@ const purchaseToken = async (
         }
       }
 
-      //Make transfer
+      //Debit user wallet
+      const wallet = await walletService.getMyWallet(recipientID);
+
+      const debitAmount = Number(amount * token.price);
+
+      const purchaseTx = await walletService.debitWallet(
+        debitAmount, 
+        wallet.id,
+      "purchase"
+    );
+
+      //Add tokens to user wallet
+
+      await walletService.addTokenToWallet(wallet.id, token.id, amount);
+
+      //Make HEDERA transfer
       const receipt = await hederaService.transferHederaToken(
         tokenID,
         amount, // senderID,
         recipientUser.hederaAccountID
       );
+
+
 
       //TODO: Transaction receipt
       if (!receipt) throw new Error("Error transferring token");
@@ -176,7 +194,7 @@ const purchaseToken = async (
 
       //TODO: Update project tonnes
       await token.save();
-      return token;
+      return purchaseTx;
     }
   } catch (error) {
     console.error({ error: error.message });

@@ -18,6 +18,10 @@ const mrvUserSchema = new Schema(
     hederaAccountID: { type: String },
     hederaPublicKey: { type: String },
     hederaPrivateKey: { type: String },
+    wallet: {       
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Wallet",
+ },
   },
   {
     timestamps: true,

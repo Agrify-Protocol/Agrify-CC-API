@@ -52,7 +52,7 @@ const getMyWallet = async (req, res) => {
 
     // const result = await Token.find({tokenOwner: req.userId}).sort({ tokenName: 1 }).exec();
 
-    const wallet = await Wallet.findOne({ userId: req.userId });
+    const wallet = await walletService.getMyWallet(req.userId);
 
     if (!wallet) {
       return res.status(404).json({ message: `No wallet found for user ${req.userId}` });
@@ -64,24 +64,14 @@ const getMyWallet = async (req, res) => {
   }
 };
 
-function generateUniqueRef() {
-  const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let code = "";
-  for (let i = 0; i < 8; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    code += characters[randomIndex];
-  }
-  return code;
-}
-
 const fundWallet = async (req, res) => {
   const { amount } =
     req.body;
 
-  const reference = generateUniqueRef();
   try {
+    const wallet = await walletService.getMyWallet(req.userId);
     // const token = await Token.findOne({tokenSymbol: tokenSymbol});
-    const depositReceipt = await walletService.creditWallet(amount, req.userId, "deposit", reference);
+    const depositReceipt = await walletService.creditWallet(amount, wallet.id, "deposit");
 
     if (!depositReceipt) {
       return res.status(200).json({ message: "Transaction failed" });
@@ -95,8 +85,10 @@ const fundWallet = async (req, res) => {
 const withdraw = async (req, res) => {
   const { amount } =
     req.body;
+    try {
+  const wallet = await walletService.getMyWallet(req.userId);
 
-  const wallet = await Wallet.findOne({ userId: req.userId });
+  // const wallet = await Wallet.findOne({ _id: wa });
   if (!wallet) {
     return res.status(404).json({ message: "No wallet found" });
   }
@@ -105,10 +97,8 @@ const withdraw = async (req, res) => {
     return res.status(400).json({ message: "Insufficient balance" });
   }
 
-  const reference = generateUniqueRef();
-  try {
     // const token = await Token.findOne({tokenSymbol: tokenSymbol});
-    const depositReceipt = await walletService.debitWallet(amount, req.userId, "withdrawal", reference);
+    const depositReceipt = await walletService.debitWallet(amount, wallet.id, "withdrawal");
 
     if (!depositReceipt) {
       return res.status(200).json({ message: "Transaction failed" });

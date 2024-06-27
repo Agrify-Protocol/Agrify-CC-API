@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const MrvUser = require("../../models/mrv_user.model");
 const sendEmail = require("../../utils/sendEmail");
 const hederaService = require("../../hedera/service/createAccount.js");
+const walletService = require("../../service/walletService.js");
 
 const register = async (req, res) => {
   try {
@@ -36,6 +37,10 @@ const register = async (req, res) => {
     mrvUser.hederaPublicKey = hederaPublicKey;
     //TODO: Encrypt
     mrvUser.hederaPrivateKey = hederaPrivateKey;
+
+    //Create wallet 
+    const wallet = await walletService.createWallet(mrvUser._id);
+    mrvUser.wallet = wallet;
     await mrvUser.save();
     const welcomeLink = `${process.env.CLIENT_URL}/mrvEmailVerify?token=${verifyToken}`;
     sendEmail(

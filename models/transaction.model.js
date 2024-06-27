@@ -11,7 +11,7 @@ const transactionSchema = new Schema(
     },
     purpose:{
       type: String,
-      enum : ['deposit', 'transfer', 'reversal', 'withdrawal'],
+      enum : ['deposit', 'purchase', 'reversal', 'withdrawal'],
       required: true
     },
     amount: {
@@ -19,7 +19,7 @@ const transactionSchema = new Schema(
       required: true,
       default: 0.00
     },
-    userId: {
+    walletId: {
       type: String,
       required: true,
       // ref: 'Wallet'
@@ -41,7 +41,7 @@ const transactionSchema = new Schema(
       transform: function (doc, ret) {
         delete ret.__v;
         delete ret._id;
-        delete ret.userId;
+        delete ret.walletId;
         delete ret.updatedAt;
         delete ret.balanceBefore;
         delete ret.balanceAfter;
