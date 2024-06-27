@@ -1,7 +1,7 @@
 const express = require('express');
 const authMiddleware = require('../middleware/auth');
 
-const {createFarm, getFarmById} = require('../controllers/farm.controller');
+const {createFarm, getFarmById, getFarmByFarmerId} = require('../controllers/farm.controller');
 
 const router = express.Router();
 
@@ -9,5 +9,6 @@ const router = express.Router();
 // router.get('/farm', getProjects);
 router.post('/farm', authMiddleware, createFarm);
 router.get('/farm/:id', authMiddleware, getFarmById);
+router.get('/farm/get-by-farmer/:farmerId', getFarmByFarmerId);
 
 module.exports = router;
