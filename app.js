@@ -13,6 +13,8 @@ const waitlistRoutes = require("./routes/waitlist.route");
 const tokenRoutes = require("./routes/token.route");
 const mrvAuthRoutes = require("./routes/mrv/mrv_auth.route");
 const mrvProfileRoutes = require("./routes/mrv/mrv_profile.route");
+const soilDataRoutes = require("./routes/soil_data.route");
+const farmSuggestionRoutes = require("./routes/farm_suggestion.route");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 const cloudinary = require("./utils/cloudinary");
@@ -45,6 +47,8 @@ app.use("/api/v1/waitlist", waitlistRoutes);
 app.use("/api/v1/tokens", tokenRoutes);
 app.use("/api/v1/mrv/auth/", mrvAuthRoutes);
 app.use("/api/v1/mrv/profile", mrvProfileRoutes);
+app.use("/api/v1/soil-data/", soilDataRoutes);
+app.use("/api/v1/farm-suggestions", farmSuggestionRoutes);
 
 app.post("/api/v1/upload", upload.array("images"), async (req, res) => {
   const uploadedImages = [];
