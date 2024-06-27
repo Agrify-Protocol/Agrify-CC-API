@@ -25,11 +25,13 @@ const farmSchema = new Schema (
             required: true
         },
         lat: {
-            type: String,
+            type: Number,
         },
         long: {
-            type: String,
+            type: Number,
         },
+        area: {type: Number},
+        farmer: {type: mongoose.Schema.Types.ObjectId, ref: 'MrvUser'}
         //TODO: Add projects Object
     },
     {timestamps: true}
