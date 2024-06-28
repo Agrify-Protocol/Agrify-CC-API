@@ -8,6 +8,14 @@ const userSchema = new Schema(
     email: { type: String, unique: true },
     password: { type: String },
     isAdmin: { type: Boolean, default: false },
+    isBuyer: { type: Boolean, default: true },
+    hederaAccountID: { type: String },
+    hederaPublicKey: { type: String },
+    hederaPrivateKey: { type: String },
+    wallet: {       
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Wallet",
+ },
   },
   {
     timestamps: true,
@@ -17,6 +25,8 @@ const userSchema = new Schema(
         delete ret.password;
         delete ret.createdAt;
         delete ret.updatedAt;
+        delete ret.hederaPublicKey;
+        delete ret.hederaPrivateKey;
       },
     },
   }

@@ -25,7 +25,7 @@ const walletSchema = new Schema(
           required: true,
           ref: "Token",
         },
-        amount: {
+        amountInTonnes: {
           type: Number,
           required: true,
         },

@@ -9,9 +9,9 @@ const transactionSchema = new Schema(
       required: true,
       enum: ['CR', 'DR']
     },
-    purpose:{
+    desc:{
       type: String,
-      enum : ['deposit', 'purchase', 'reversal', 'withdrawal'],
+      // enum : ['deposit', 'purchase', 'reversal', 'withdrawal'],
       required: true
     },
     amount: {

@@ -13,7 +13,7 @@ const getMyWallet = async (userId) => {
     });
 
     if (!wallet) {
-      throw new Error(`No wallet found for user ${req.userId}`);
+      throw new Error(`No wallet found for user ${userId}`);
     }
     return wallet;
   } catch (error) {
@@ -54,7 +54,7 @@ const deleteWallet = async (userId) => {
 const creditWallet = async (
   amount,
   walletId,
-  purpose) => {
+  desc) => {
   const wallet = await Wallet.findOne({ _id: walletId });
   if (!wallet) {
     //TODO: Create wallet
@@ -67,7 +67,7 @@ const creditWallet = async (
 
   const transaction = await Transaction.create([{
     trnxType: 'CR',
-    purpose,
+    desc,
     amount,
     walletId,
     reference,
@@ -80,7 +80,7 @@ const creditWallet = async (
 
 }
 
-const addTokenToWallet = async (
+const addTokenToBuyerWallet = async (
   walletId,
   tokenId,
   amount) => {
@@ -91,11 +91,34 @@ const addTokenToWallet = async (
   const existingToken = walletTokens.findIndex(t => t.token.toHexString() == tokenId);
 
   if (existingToken == -1) {
-    await wallet.tokens.push({ token: token, amount: amount });
+    await wallet.tokens.push({ token: token, amountInTonnes: amount });
     await wallet.save();
   }
   else {
-    wallet.tokens[existingToken].amount += amount;
+    wallet.tokens[existingToken].amountInTonnes += amount;
+    await wallet.save();
+  }
+  // existingToken.amount += amount;
+  // const updatedWallet = await Wallet.findOneAndUpdate({_id: walletId}, { $inc: { balance: amount } });
+  return existingToken;
+}
+
+const addTokenToFarmerWallet = async (
+  walletId,
+  tokenId,
+  amount) => {
+  const wallet = await Wallet.findOne({ _id: walletId });
+  const token = await Token.findOne({ _id: tokenId });
+  const walletTokens = wallet.tokens;
+  // if (wallet.tokens.includes({token})){
+  const existingToken = walletTokens.findIndex(t => t.token.toHexString() == tokenId);
+
+  if (existingToken == -1) {
+    await wallet.tokens.push({ token: token, amountInTonnes: token.availableTonnes - amount });
+    await wallet.save();
+  }
+  else {
+    wallet.tokens[existingToken].amountInTonnes -= amount;
     await wallet.save();
   }
   // existingToken.amount += amount;
@@ -116,7 +139,7 @@ function generateUniqueRef() {
 const debitWallet = async (
   amount,
   walletId,
-  purpose) => {
+  desc) => {
   const wallet = await Wallet.findOne({ _id: walletId });
   if (!wallet) {
     throw new Error(`Wallet ${walletId} not found`);
@@ -132,7 +155,7 @@ const debitWallet = async (
 
   const transaction = await Transaction.create([{
     trnxType: 'DR',
-    purpose,
+    desc,
     amount,
     walletId,
     reference,
@@ -152,5 +175,6 @@ module.exports = {
   createWallet,
   creditWallet,
   debitWallet,
-  addTokenToWallet,
+  addTokenToFarmerWallet,
+  addTokenToBuyerWallet
 };
