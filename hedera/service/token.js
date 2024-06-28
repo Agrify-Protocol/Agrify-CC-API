@@ -1,4 +1,4 @@
-const {TokenCreateTransaction, TokenType, TokenSupplyType, PrivateKey, TokenBurnTransaction, TokenAssociateTransaction, TransferTransaction} = require("@hashgraph/sdk");
+const {TokenCreateTransaction, TokenType, TokenSupplyType, PrivateKey, TokenBurnTransaction, TokenAssociateTransaction, TransferTransaction, AccountBalanceQuery} = require("@hashgraph/sdk");
 const { ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY } = require("../config/config.js");
 const { client } = require("../client/client.js")
 // const { Client, PrivateKey, AccountCreateTransaction, AccountBalanceQuery, Hbar, TransferTransaction } = require("@hashgraph/sdk");
@@ -109,6 +109,20 @@ console.log("Transfer status " +transactionStatus.toString());
 return receipt;
 }
 
+const queryTokenBalance = async(accountID) => {
+//Create the query
+const query = new AccountBalanceQuery()
+.setAccountId(accountID);
+
+//Sign with the client operator private key and submit to a Hedera network
+const tokenBalance = await query.execute(client);
+
+console.log("The token balance(s) for this account: " +tokenBalance.tokens.toString());
+
+return tokenBalance;
+
+}
 
 
-module.exports = {createHederaToken, burnHederaToken, associateHederaToken, transferHederaToken};
+
+module.exports = {createHederaToken, burnHederaToken, associateHederaToken, transferHederaToken, queryTokenBalance};

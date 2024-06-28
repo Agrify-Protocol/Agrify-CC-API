@@ -9,7 +9,7 @@ const { faker } = require("@faker-js/faker");
 const getProjectById = async (req, res) => {
   const { id } = req.params;
   try {
-    const project = await Project.findById(id).populate({ path: "tags" });
+    const project = await Project.findById(id).populate({ path: "tags" }).populate({ path: "projectToken" });
     if (!project) {
       return res
         .status(404)
@@ -125,15 +125,27 @@ const createProject = async (req, res) => {
       certificateCode,
     } = req.body;
 
+    //Create token for project
+    const token = await tokenService.createToken(
+      projectId,
+      title,
+      req.userId,
+      totalTonnes,
+      availableTonnes,
+      minimumPurchaseTonnes,
+      price
+    );
+    if (!token) throw new Error("Error creating project token");
+
     const project = await Project.create({
       title,
       description,
-      price: parseFloat(price),
-      availableTonnes: parseInt(availableTonnes),
-      totalTonnes: parseInt(totalTonnes),
+      // price: parseFloat(price),
+      // availableTonnes: parseInt(availableTonnes),
+      // totalTonnes: parseInt(totalTonnes),
       images: uploadedImages,
       projectId,
-      minimumPurchaseTonnes: parseInt(minimumPurchaseTonnes),
+      // minimumPurchaseTonnes: parseInt(minimumPurchaseTonnes),
       location,
       countryOfOrigin,
       creditStartDate: convertStringToDate(creditStartDate),
@@ -147,18 +159,10 @@ const createProject = async (req, res) => {
       certificationURL,
       certificateCode,
       supportingDocument: supportingDocumentLink,
+      projectToken: token,
     });
 
-    //Create token for project
-    const token = await tokenService.createToken(
-      project.projectId,
-      title,
-      req.userId,
-      totalTonnes,
-      availableTonnes
-    );
-    if (!token) throw new Error("Error creating project token");
-    project.projectToken = token;
+    // project.projectToken = token;
 
     // find existing tags by their IDs
     const existingTags = await Tag.find({ _id: { $in: tags } });

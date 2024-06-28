@@ -10,6 +10,9 @@ const tokenSchema = new Schema(
     tokenOwner: { type: String, required: true },
     totalTonnes: { type: Number, required: true },
     availableTonnes: { type: Number, required: true },
+    minimumPurchaseTonnes: { type: Number, required: true },
+    balance: { type: Number, required: true, default: 0.00 },
+    price: { type: Number, required: true },
     associatedAccounts: [
        { type: String }
     ],
@@ -23,6 +26,7 @@ const tokenSchema = new Schema(
         delete ret.createdAt;
         delete ret.updatedAt;
         delete ret.associatedAccounts;
+        delete ret.balance;
       },
     },
   }
