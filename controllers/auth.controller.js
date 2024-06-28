@@ -5,6 +5,8 @@ const User = require("../models/user.model");
 const MrvUser = require("../models/mrv_user.model");
 const ResetToken = require("../models/resetToken.model");
 const sendEmail = require("../utils/sendEmail");
+const hederaService = require("../hedera/service/createAccount.js");
+const walletService = require("../service/walletService.js");
 
 const register = async (req, res) => {
   try {
@@ -26,6 +28,17 @@ const register = async (req, res) => {
       email,
       password: hashPassword,
     });
+    const [hederaAccountID, hederaPublicKey, hederaPrivateKey] =
+    await hederaService.createHederaAccount();
+
+    user.hederaAccountID = hederaAccountID;
+    user.hederaPublicKey = hederaPublicKey;
+    //TODO: Encrypt
+    user.hederaPrivateKey = hederaPrivateKey;
+
+    //Create wallet 
+    const wallet = await walletService.createWallet(user._id);
+    user.wallet = wallet;
     await user.save();
     res.status(201).json({ message: "User account created!" });
   } catch (error) {

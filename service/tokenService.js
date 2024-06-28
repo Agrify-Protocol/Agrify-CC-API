@@ -1,7 +1,7 @@
 const Token = require("../models/token.model");
 const hederaService = require("../hedera/service/token.js");
 const walletService = require("../service/walletService.js");
-const MrvUser = require("../models/mrv_user.model");
+const User = require("../models/user.model");
 require("dotenv").config();
 
 //TODO: Token refactor
@@ -136,7 +136,7 @@ const associateToken = async (tokenSymbol, accountID) => {
 const purchaseToken = async (
   tokenSymbol,
   amount, //senderID,
-  recipientID
+  buyerID
 ) => {
   try {
     const token = await getToken(tokenSymbol);
@@ -147,42 +147,55 @@ const purchaseToken = async (
 
 
     {
-      const recipientUser = await MrvUser.findOne({ _id: recipientID });
+      const buyer = await User.findOne({ _id: buyerID });
 
       //Associate token to user
-      if (!token.associatedAccounts.includes(recipientUser.hederaAccountID)) {
+      if (!token.associatedAccounts.includes(buyer.hederaAccountID)) {
         const associationReceipt = await hederaService.associateHederaToken(
           tokenID,
-          recipientUser
+          buyer
         );
         if (!associationReceipt) {
           throw new Error("Unable to associate token to recipient");
         } else {
-          await token.associatedAccounts.push(recipientUser.hederaAccountID);
+          await token.associatedAccounts.push(buyer.hederaAccountID);
           await token.save();
         }
       }
 
       //Debit user wallet
-      const wallet = await walletService.getMyWallet(recipientID);
+      const buyerWallet = await walletService.getMyWallet(buyerID);
 
-      const debitAmount = Number(amount * token.price);
+      const totalAmount = Number(amount * token.price);
 
-      const purchaseTx = await walletService.debitWallet(
-        debitAmount, 
-        wallet.id,
-      "purchase"
+      const debitTx = await walletService.debitWallet(
+        totalAmount, 
+        buyerWallet.id,
+      `Bought ${amount} tonnes of ${token.tokenSymbol}`
     );
 
-      //Add tokens to user wallet
+      //Credit farmer wallet
+      const farmerWallet = await walletService.getMyWallet(token.tokenOwner);
 
-      await walletService.addTokenToWallet(wallet.id, token.id, amount);
+      const creditTx = await walletService.creditWallet(
+        totalAmount, 
+        farmerWallet.id,
+      `Sold ${amount} tonnes of ${token.tokenSymbol}`
+    );
+
+      //Add tokens to buyer wallet
+
+      await walletService.addTokenToBuyerWallet(buyerWallet.id, token.id, amount);
+
+      //Add tokens to farmer wallet
+
+      await walletService.addTokenToFarmerWallet(farmerWallet.id, token.id, amount);
 
       //Make HEDERA transfer
       const receipt = await hederaService.transferHederaToken(
         tokenID,
         amount, // senderID,
-        recipientUser.hederaAccountID
+        buyer.hederaAccountID
       );
 
 
@@ -194,7 +207,7 @@ const purchaseToken = async (
 
       //TODO: Update project tonnes
       await token.save();
-      return purchaseTx;
+      return debitTx;
     }
   } catch (error) {
     console.error({ error: error.message });

@@ -5,7 +5,7 @@ const cloudinary = require("../../utils/cloudinary");
 
 const getProfile = async (req, res) => {
   try {
-    const mrvUser = await MrvUser.findById(req.userId).populate({ path: "wallet" });
+    const mrvUser = await MrvUser.findById(req.userId).populate("wallet", { currency: 1, balance: 1});
 
     const profileData = {
       _id: mrvUser._id,

@@ -1,5 +1,6 @@
 const Token = require("../models/token.model");
 const MrvUser = require("../models/mrv_user.model");
+const User = require("../models/user.model");
 const hederaService = require("../hedera/service/token.js");
 const tokenService = require("../service/tokenService.js");
 const walletService = require("../service/walletService.js");
@@ -18,13 +19,18 @@ const getMyTokens = async (req, res) => {
   try {
     //TODO: Token refactor
 
-    // const result = await Token.find({tokenOwner: req.userId}).sort({ tokenName: 1 }).exec();
+    const result = await Token.find({tokenOwner: req.userId}).sort({ tokenName: 1 }).exec();
 
-    const user = await MrvUser.findOne({ _id: req.userId });
+    // var findUser = await MrvUser.findOne({ _id: req.userId });
+
+    // if (!findUser){
+    //   findUser = await User.findOne({ _id: req.userId });
+    // }
+    // const user = findUser;
 
     // const result = await Token.find({ associatedAccounts: { $in: [user.hederaAccountID] } })
 
-    const result = await tokenService.queryTokenBalance(user.hederaAccountID);
+    // const result = await tokenService.queryTokenBalance(user.hederaAccountID);
 
     res.status(200).json({ message: "My tokens", data: result });
   } catch (error) {
@@ -96,7 +102,6 @@ const purchaseToken = async (req, res) => {
 
     // else {
 
-    //TODO: Insufficient balance
     const token = await tokenService.getToken(tokenSymbol);
 
     const debitAmount = Number(amount * token.price);
@@ -120,7 +125,7 @@ const purchaseToken = async (req, res) => {
     }
       const tokenReceipt = await tokenService.purchaseToken(tokenSymbol, amount, req.userId);
       if (!tokenReceipt) throw new Error("Error transferring token");
-      res.status(200).json({ tokenReceipt });
+      res.status(200).json({message: "Transaction successful", data: tokenReceipt });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

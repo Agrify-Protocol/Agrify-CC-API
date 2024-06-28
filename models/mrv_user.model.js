@@ -33,6 +33,7 @@ const mrvUserSchema = new Schema(
         delete ret.updatedAt;
         delete ret.hederaPublicKey;
         delete ret.hederaPrivateKey;
+        delete ret.wallet.tokens;
       },
     },
   }
