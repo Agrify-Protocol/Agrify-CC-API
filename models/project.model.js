@@ -12,21 +12,21 @@ const projectSchema = new Schema(
       type: String,
       required: true,
     },
-    price: {
-      type: Number,
-      required: true,
-      min: [0, "At least a positive value"],
-    },
-    availableTonnes: {
-      type: Number,
-      required: true,
-      min: [0, "At least 1"],
-    },
-    totalTonnes: {
-      type: Number,
-      required: true,
-      min: [0, "At least 1"],
-    },
+    // price: {
+    //   type: Number,
+    //   required: true,
+    //   min: [0, "At least a positive value"],
+    // },
+    // availableTonnes: {
+    //   type: Number,
+    //   required: true,
+    //   min: [0, "At least 1"],
+    // },
+    // totalTonnes: {
+    //   type: Number,
+    //   required: true,
+    //   min: [0, "At least 1"],
+    // },
     tags: [
       {
         type: Schema.Types.ObjectId,
@@ -46,11 +46,11 @@ const projectSchema = new Schema(
       type: String,
       required: true,
     },
-    minimumPurchaseTonnes: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
+    // minimumPurchaseTonnes: {
+    //   type: Number,
+    //   required: true,
+    //   default: 0,
+    // },
     location: {
       type: String,
     },

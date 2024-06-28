@@ -5,7 +5,7 @@ const cloudinary = require("../../utils/cloudinary");
 
 const getProfile = async (req, res) => {
   try {
-    const mrvUser = await MrvUser.findById(req.userId);
+    const mrvUser = await MrvUser.findById(req.userId).populate({ path: "wallet" });
 
     const profileData = {
       _id: mrvUser._id,
@@ -14,6 +14,7 @@ const getProfile = async (req, res) => {
       email: mrvUser.email,
       profileImageUrl: mrvUser.profileImageUrl,
       isOnboardingComplete: mrvUser.isOnboardingComplete,
+      wallet: mrvUser.wallet,
     };
     res.status(200).json({ mrvUser: profileData });
   } catch (error) {
