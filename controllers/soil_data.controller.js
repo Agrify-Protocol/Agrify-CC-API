@@ -4,15 +4,15 @@ const Farm = require("../models/farm.model");
 
 const createSoilData = async (req, res) => {
   try {
-    const { FarmerId, FarmId } = req.body;
+    const { FarmId } = req.body;
 
     // Check if the farmer exists
-    const farmer = await MrvUser.findById(FarmerId);
-    if (!farmer) {
-      return res
-        .status(404)
-        .json({ message: `Farmer does not exist with ID ${FarmerId}` });
-    }
+    // const farmer = await MrvUser.findById(FarmerId);
+    // if (!farmer) {
+    //   return res
+    //     .status(404)
+    //     .json({ message: `Farmer does not exist with ID ${FarmerId}` });
+    // }
 
     // Check if the farm exists
     const farm = await Farm.findById(FarmId);
