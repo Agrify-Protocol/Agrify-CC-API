@@ -4,15 +4,15 @@ const MrvUser = require("../models/mrv_user.model");
 
 const createFarmSuggestion = async (req, res) => {
   try {
-    const { FarmerId, FarmId } = req.body;
+    const { FarmId } = req.body;
     // check if the farmer id exists
-    const farmer = await MrvUser.findById(FarmerId);
+    // const farmer = await MrvUser.findById(FarmerId);
 
-    if (!farmer) {
-      return res
-        .status(404)
-        .json({ message: `Farmer does not exist with ID ${FarmerId}` });
-    }
+    // if (!farmer) {
+    //   return res
+    //     .status(404)
+    //     .json({ message: `Farmer does not exist with ID ${FarmerId}` });
+    // }
 
     const farm = await farmModel.findById(FarmId);
     if (!farm) {
@@ -35,7 +35,7 @@ const createFarmSuggestion = async (req, res) => {
     const farmSuggestionData = {
       PeriodStart: req.body.PeriodStart,
       PeriodEnd: req.body.PeriodEnd,
-      FarmerId: req.body.FarmerId,
+      // FarmerId: req.body.FarmerId,
       FarmId: req.body.FarmId,
       FarmerName: req.body.FarmerName,
       FarmScore: req.body.FarmScore,
