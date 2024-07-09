@@ -2,8 +2,12 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const projectSchema = new Schema(
+const aggregateSchema = new Schema(
   {
+    projectId: {
+      type: String,
+      required: true,
+    },
     title: {
       type: String,
       required: true,
@@ -21,11 +25,13 @@ const projectSchema = new Schema(
     //   type: Number,
     //   required: true,
     //   min: [0, "At least 1"],
+    //   default: 0,
     // },
     // totalTonnes: {
     //   type: Number,
     //   required: true,
     //   min: [0, "At least 1"],
+    //   default: 0,
     // },
     tags: [
       {
@@ -42,14 +48,9 @@ const projectSchema = new Schema(
     coverImage: {
       type: String,
     },
-    projectId: {
-      type: String,
-      required: true,
-    },
     // minimumPurchaseTonnes: {
     //   type: Number,
     //   required: true,
-    //   default: 0,
     // },
     location: {
       type: String,
@@ -62,31 +63,40 @@ const projectSchema = new Schema(
       type: Number,
       // required: true,
     },
-    countryOfOrigin: {
+    state: {
       type: String,
       required: true,
     },
-    projectProvider: {
+    country: {
       type: String,
+      required: true,
     },
-    projectWebsite: {
+    category: {
       type: String,
-    },
-    blockchainAddress: {
-      type: String,
-    },
-    typeOfProject: {
-      type: String,
-    },
-    certification: {
-      type: String,
-    },
-    certificationURL: {
-      type: String,
-    },
-    certificateCode: {
-      type: String,
-    },
+      enum : ['cassava', 'yam', 'tomato', 'soybean', 'rice', 'maize'],
+      required: true
+  },
+// projectProvider: {
+    //   type: String,
+    // },
+    // projectWebsite: {
+    //   type: String,
+    // },
+    // blockchainAddress: {
+    //   type: String,
+    // },
+    // typeOfProject: {
+    //   type: String,
+    // },
+    // certification: {
+    //   type: String,
+    // },
+    // certificationURL: {
+    //   type: String,
+    // },
+    // certificateCode: {
+    //   type: String,
+    // },
     creditStartDate: {
       type: Date,
     },
@@ -106,8 +116,10 @@ const projectSchema = new Schema(
         ref: "Farm",
       },
     ],
+
+    //TODO: Add farmID
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Project", projectSchema);
+module.exports = mongoose.model("Aggregate", aggregateSchema);

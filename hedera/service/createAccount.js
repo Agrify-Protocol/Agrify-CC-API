@@ -1,5 +1,5 @@
 const { AccountCreateTransaction, PrivateKey, Hbar, HbarUnit } = require("@hashgraph/sdk");
-const { ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, initialHbarBalance } = require("../config/config.js");
+const { ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, initialHbarBalance } = require("../../config.js");
 const { client } = require("../client/client.js")
 
 //Create new keys

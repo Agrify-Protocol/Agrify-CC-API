@@ -1,5 +1,5 @@
 const { Client, PrivateKey, AccountCreateTransaction, AccountBalanceQuery, Hbar, TransferTransaction } = require("@hashgraph/sdk");
-const { ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY } = require("../config/config.js");
+const { ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY } = require("../../config.js");
 require("@hashgraph/sdk");
 
 //Create your Hedera Testnet client

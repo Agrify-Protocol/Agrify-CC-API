@@ -106,7 +106,8 @@ const addTokenToBuyerWallet = async (
 const addTokenToFarmerWallet = async (
   walletId,
   tokenId,
-  amount) => {
+  amount,
+  FP) => {
   const wallet = await Wallet.findOne({ _id: walletId });
   const token = await Token.findOne({ _id: tokenId });
   const walletTokens = wallet.tokens;
@@ -114,7 +115,7 @@ const addTokenToFarmerWallet = async (
   const existingToken = walletTokens.findIndex(t => t.token.toHexString() == tokenId);
 
   if (existingToken == -1) {
-    await wallet.tokens.push({ token: token, amountInTonnes: token.availableTonnes - amount });
+    await wallet.tokens.push({ token: token, amountInTonnes: (FP * token.availableTonnes).toFixed(2) - amount });
     await wallet.save();
   }
   else {
