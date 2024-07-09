@@ -29,6 +29,22 @@ const getAggregateProjectById = async (req, res) => {
   }
 };
 
+
+
+const getProjectsByCategory = async (req, res) => {
+  const { category } = req.params;
+
+  try {
+    const filter = {category: { $in: [category]}};
+    const result = await Aggregate.find(filter).sort({ availableTonnes: -1 }).exec();
+    const total = await Aggregate.countDocuments(filter);
+    res.status(200).json({ message: `List of ${category} farms`, total: total, data: result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 const getAllAggregateProjects = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -63,7 +79,7 @@ const getAllAggregateProjects = async (req, res) => {
         path: "tags",
         select: tagFields,
       });
-    const total = await Project.countDocuments();
+    const total = await Aggregate.countDocuments();
     const totalPages = Math.ceil(total / limit);
 
     const nextPage = page < totalPages ? page + 1 : null;
@@ -98,20 +114,20 @@ const createAggregateProject = async (req, res) => {
     let uploadedImages = [];
     let coverImage;
     let supportingDocumentLink;
-    // if (req.files) {
-    //   for (const file of req.files.images) {
-    //     const uploadResult = await cloudinary.v2.uploader.upload(file.path);
-    //     uploadedImages.push(uploadResult.secure_url);
-    //   }
-    //   const coverImageUpload = await cloudinary.v2.uploader.upload(
-    //     req.files.cover[0].path
-    //   );
-    //   coverImage = coverImageUpload.secure_url;
-    //   const supportingDocumentLinkUpload = await cloudinary.v2.uploader.upload(
-    //     req.files.supdoc[0].path
-    //   );
-    //   supportingDocumentLink = supportingDocumentLinkUpload.secure_url;
-    // }
+    if (req.files) {
+      for (const file of req.files.images) {
+        const uploadResult = await cloudinary.v2.uploader.upload(file.path);
+        uploadedImages.push(uploadResult.secure_url);
+      }
+      const coverImageUpload = await cloudinary.v2.uploader.upload(
+        req.files.cover[0].path
+      );
+      coverImage = coverImageUpload.secure_url;
+      const supportingDocumentLinkUpload = await cloudinary.v2.uploader.upload(
+        req.files.supdoc[0].path
+      );
+      supportingDocumentLink = supportingDocumentLinkUpload.secure_url;
+    }
 
     const {
       title,
@@ -140,8 +156,6 @@ const createAggregateProject = async (req, res) => {
       aggregateId,
       title,
       req.userId,
-      // totalTonnes,
-      // availableTonnes,
       minimumPurchaseTonnes,
       price
     );
@@ -152,11 +166,7 @@ const createAggregateProject = async (req, res) => {
       title,
       description,
       price: parseFloat(price),
-      // availableTonnes: 0,
-      // totalTonnes: 0,
       images: uploadedImages,
-      // aggregateId,
-      // minimumPurchaseTonnes: parseInt(minimumPurchaseTonnes),
       location: `${state}, ${country}`,
       state,
       country,
@@ -174,8 +184,6 @@ const createAggregateProject = async (req, res) => {
       supportingDocument: supportingDocumentLink,
       projectToken: token,
     });
-
-    // project.projectToken = token;
 
     // find existing tags by their IDs
     const existingTags = await Tag.find({ _id: { $in: tags } });
@@ -212,9 +220,6 @@ const addFarmToAggregate = async (req, res) => {
       throw new Error(`Farm ${farmID} is already a part of this project`);
 
     }
-    // else {
-    //   //Add farm
-    // }
 
     if (farm.category != aggregate.category) {
       throw new Error(`Farm ${farmID} is not a ${aggregate.category} farm`);
@@ -252,8 +257,7 @@ const addFarmToAggregate = async (req, res) => {
 module.exports = {
   createAggregateProject, //TODO: Admin middleware
   getAllAggregateProjects,
+  getProjectsByCategory,
   addFarmToAggregate,
   getAggregateProjectById,
-  // seedProjects,
-  // resetSeedProjects,
 };

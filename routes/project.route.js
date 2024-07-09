@@ -13,6 +13,7 @@ const {
 const {
   createAggregateProject,
   getAllAggregateProjects,
+  getProjectsByCategory,
   addFarmToAggregate,
   getAggregateProjectById,
 } = require("../controllers/aggregate.controller");
@@ -21,6 +22,7 @@ const router = express.Router();
 
 router.get("/projects", authMiddleware, getProjects);
 router.get("/projects/aggregate", authMiddleware, getAllAggregateProjects);
+router.get("/projects/aggregate/:category", authMiddleware, getProjectsByCategory);
 router.post(
   "/projects",
   authMiddleware,
