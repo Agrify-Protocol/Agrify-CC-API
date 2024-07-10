@@ -8,6 +8,6 @@ require('dotenv').config();
         throw new Error("Environment variables MY_ACCOUNT_ID and MY_PRIVATE_KEY must be present");
     }
     
-    const FARMER_PAYOUT_PERCENTAGE = process.env.FARMER_PAYOUT_PERCENTAGE;
+    // const FARMER_PAYOUT_PERCENTAGE = process.env.FARMER_PAYOUT_PERCENTAGE;
 
-module.exports = { ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, initialHbarBalance, FARMER_PAYOUT_PERCENTAGE };
+module.exports = { ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, initialHbarBalance };

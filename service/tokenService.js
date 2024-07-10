@@ -5,7 +5,6 @@ const hederaService = require("../hedera/service/token.js");
 const walletService = require("../service/walletService.js");
 const User = require("../models/user.model");
 require("dotenv").config();
-const FARMER_PAYOUT_PERCENTAGE = require("../config.js");
 
 //TODO: Token refactor
 const createToken = async (
