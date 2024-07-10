@@ -1,4 +1,6 @@
 const Token = require("../models/token.model");
+const Farm = require("../models/farm.model");
+const Aggregate = require("../models/aggregate.model");
 const hederaService = require("../hedera/service/token.js");
 const walletService = require("../service/walletService.js");
 const User = require("../models/user.model");
@@ -9,17 +11,19 @@ const createToken = async (
   projectId,
   tokenName,
   tokenOwner,
-  totalTonnes,
-  availableTonnes,
+  // totalTonnes,
+  // availableTonnes,
   minimumPurchaseTonnes,
   price,
 ) => {
   try {
     const tokenSymbol = `${projectId}-AGT`;
+    const totalTonnes = 0;
     const tokenId = await hederaService.createHederaToken(
       tokenName,
       tokenSymbol,
       totalTonnes
+
     );
     if (!tokenId) throw new Error("Error creating token");
     const token = await Token.create({
@@ -29,7 +33,7 @@ const createToken = async (
       tokenSymbol,
       tokenOwner,
       totalTonnes,
-      availableTonnes,
+      availableTonnes: totalTonnes,
       minimumPurchaseTonnes,
       price,
     });
@@ -52,9 +56,9 @@ const getToken = async (tokenSymbol) => {
   }
 };
 
-const getTokenByID = async (tokenSymbol) => {
+const getTokenByID = async (tokenId) => {
   try {
-    const token = await Token.findOne({ tokenId: tokenSymbol });
+    const token = await Token.findOne({ tokenId: tokenId });
 
     if (!token) throw new Error("Unable to get token");
     return token;
@@ -112,6 +116,29 @@ const burnToken = async (tokenSymbol) => {
   }
 };
 
+const mintToken = async (tokenSymbol, amount) => {
+  try {
+    const token = await getToken(tokenSymbol);
+    const tokenID = token.tokenId;
+    // const amountInCirculation = token.totalTonnes;
+
+    const receipt = await hederaService.mintHederaToken(
+      tokenID,
+      amount
+    );
+    if (!receipt) throw new Error("Error minting token");
+    token.totalTonnes += amount;
+    token.availableTonnes += amount;
+    // token.tokenId = tokenID;
+    await token.save();
+    console.log(`Successfully minted ${amount} tokens`);
+    return token;
+  } catch (error) {
+    console.error({ error: error.message });
+    return error;
+  }
+};
+
 const associateToken = async (tokenSymbol, accountID) => {
   try {
     const token = await getToken(tokenSymbol);
@@ -135,7 +162,7 @@ const associateToken = async (tokenSymbol, accountID) => {
 
 const purchaseToken = async (
   tokenSymbol,
-  amount, //senderID,
+  amountInTonnes, //senderID,
   buyerID
 ) => {
   try {
@@ -147,7 +174,7 @@ const purchaseToken = async (
 
 
     {
-      const buyer = await User.findOne({ _id: buyerID });
+      const buyer = await User.findById(buyerID);
 
       //Associate token to user
       if (!token.associatedAccounts.includes(buyer.hederaAccountID)) {
@@ -166,44 +193,61 @@ const purchaseToken = async (
       //Debit user wallet
       const buyerWallet = await walletService.getMyWallet(buyerID);
 
-      const totalAmount = Number(amount * token.price);
+      const amountInFiat = Number(amountInTonnes * token.price);
 
       const debitTx = await walletService.debitWallet(
-        totalAmount, 
+        amountInFiat,
         buyerWallet.id,
-      `Bought ${amount} tonnes of ${token.tokenSymbol}`
-    );
+        `Bought ${amountInTonnes} tonnes of ${token.tokenSymbol}`
+      );
 
       //Credit farmer wallet
-      const farmerWallet = await walletService.getMyWallet(token.tokenOwner);
+      const project = await Aggregate.findOne({ projectToken: token });
 
-      const creditTx = await walletService.creditWallet(
-        totalAmount, 
-        farmerWallet.id,
-      `Sold ${amount} tonnes of ${token.tokenSymbol}`
-    );
+      const farmList = project.farms;
+
+      //FOR EACH FARM IN FARMS
+      farmList.forEach(async (farmRef) => {
+        const farmID = farmRef.toString();
+        const farm = await Farm.findOne({ _id: farmID});
+        // FARMER PERCENTAGE (FP) = farmerAvailableTonnes / projectAvailableTonnes 
+        const FP = farm.availableTonnes / token.availableTonnes;
+
+        //FARM TONNES DEBIT = FP * amountInTonnes
+        const debitedAmountInTonnes = FP * amountInTonnes;
+        farm.availableTonnes -= debitedAmountInTonnes;
+        await farm.save();
+
+        //FARMER WALLET CREDIT = 70% * (FP * amountInFiat)
+        const creditAmount = (0.7 * FP * amountInFiat).toFixed(2);
+        const farmerWallet = await walletService.getMyWallet(farm.farmer);
+
+        const creditTx = await walletService.creditWallet(
+          creditAmount,
+          farmerWallet.id,
+          `Sold ${debitedAmountInTonnes} tonnes of ${token.tokenSymbol}`
+        );
+
+        //Add tokens to farmer wallet
+        await walletService.addTokenToFarmerWallet(farmerWallet.id, token.id, debitedAmountInTonnes, FP);
+
+      });
 
       //Add tokens to buyer wallet
 
-      await walletService.addTokenToBuyerWallet(buyerWallet.id, token.id, amount);
-
-      //Add tokens to farmer wallet
-
-      await walletService.addTokenToFarmerWallet(farmerWallet.id, token.id, amount);
+      await walletService.addTokenToBuyerWallet(buyerWallet.id, token.id, amountInTonnes);
 
       //Make HEDERA transfer
       const receipt = await hederaService.transferHederaToken(
         tokenID,
-        amount, // senderID,
+        amountInTonnes, // senderID,
         buyer.hederaAccountID
       );
-
-
 
       //TODO: Transaction receipt
       if (!receipt) throw new Error("Error transferring token");
 
-      token.availableTonnes -= amount;
+      token.availableTonnes -= amountInTonnes;
 
       //TODO: Update project tonnes
       await token.save();
@@ -220,6 +264,7 @@ module.exports = {
   getToken,
   getTokenByID,
   burnToken,
+  mintToken,
   associateToken,
   purchaseToken,
   queryTokenBalance,

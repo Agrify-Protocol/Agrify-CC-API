@@ -24,6 +24,11 @@ const farmSchema = new Schema (
             type: String,
             required: true
         },
+        category: {
+            type: String,
+            enum : ['cassava', 'yam', 'tomato', 'soybean', 'rice', 'maize'],
+            required: true
+        },
         lat: {
             type: Number,
         },
@@ -31,8 +36,9 @@ const farmSchema = new Schema (
             type: Number,
         },
         area: {type: Number},
-        farmer: {type: mongoose.Schema.Types.ObjectId, ref: 'MrvUser'}
-        //TODO: Add projects Object
+        farmer: {type: mongoose.Schema.Types.ObjectId, ref: 'MrvUser'},
+        availableTonnes: {type: Number},
+
     },
     {timestamps: true}
 );

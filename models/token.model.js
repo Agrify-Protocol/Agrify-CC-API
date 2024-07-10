@@ -8,6 +8,7 @@ const tokenSchema = new Schema(
     tokenName: { type: String, required: true },
     tokenSymbol: { type: String, required: true },
     tokenOwner: { type: String, required: true },
+    projectFarmers: [{ type: String }],
     totalTonnes: { type: Number, required: true },
     availableTonnes: { type: Number, required: true },
     minimumPurchaseTonnes: { type: Number, required: true },
