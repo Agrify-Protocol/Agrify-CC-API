@@ -37,9 +37,6 @@ const deleteWallet = async (req, res) => {
 
 const getMyWallet = async (req, res) => {
   try {
-    //TODO: Token refactor
-
-    // const result = await Token.find({tokenOwner: req.userId}).sort({ tokenName: 1 }).exec();
 
     const wallet = await walletService.getMyWallet(req.userId);
 
@@ -59,7 +56,6 @@ const fundWallet = async (req, res) => {
 
   try {
     const wallet = await walletService.getMyWallet(req.userId);
-    // const token = await Token.findOne({tokenSymbol: tokenSymbol});
     const depositReceipt = await walletService.creditWallet(amount, wallet.id, "Deposit");
 
     if (!depositReceipt) {
@@ -77,7 +73,6 @@ const withdraw = async (req, res) => {
     try {
   const wallet = await walletService.getMyWallet(req.userId);
 
-  // const wallet = await Wallet.findOne({ _id: wa });
   if (!wallet) {
     return res.status(404).json({ message: "No wallet found" });
   }
@@ -86,7 +81,6 @@ const withdraw = async (req, res) => {
     return res.status(400).json({ message: "Insufficient balance" });
   }
 
-    // const token = await Token.findOne({tokenSymbol: tokenSymbol});
     const depositReceipt = await walletService.debitWallet(amount, wallet.id, "Withdrawal");
 
     if (!depositReceipt) {

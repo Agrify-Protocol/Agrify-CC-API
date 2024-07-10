@@ -6,20 +6,14 @@ const tokenService = require("../service/tokenService.js");
 const walletService = require("../service/walletService.js");
 const authMiddleWare = require("../middleware/auth")
 
-// const getAllTokens = async (req, res) => {
-//   try {
-//     const result = await Token.find({}).sort({ tokenName: 1 }).exec();
-//     res.status(200).json({ message: "Tokens", data: result });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
 
 const getMyTokens = async (req, res) => {
   try {
     //TODO: Token refactor
+    // if (!token.associatedAccounts.includes(buyer.hederaAccountID)) {
+    // }
 
-    const result = await Token.find({tokenOwner: req.userId}).sort({ tokenName: 1 }).exec();
+    const result = await Token.find({projectFarmers: { $in: [req.userId]}}).sort({ tokenName: 1 }).exec();
 
     // var findUser = await MrvUser.findOne({ _id: req.userId });
 
@@ -42,7 +36,6 @@ const getToken = async (req, res) => {
   const { tokenSymbol } = req.params;
 
   try {
-    // const token = await Token.findOne({tokenSymbol: tokenSymbol});
     const token = await tokenService.getToken(tokenSymbol);
 
     if (!token) {
@@ -58,7 +51,6 @@ const getTokenByID = async (req, res) => {
   const { tokenID } = req.params;
 
   try {
-    // const token = await Token.findOne({tokenSymbol: tokenSymbol});
     const token = await tokenService.getTokenByID(tokenID);
 
     if (!token) {
@@ -153,7 +145,6 @@ module.exports = {
   createToken,
   purchaseToken,
   burnToken,
-  // getAllTokens,
   getMyTokens,
   getToken,
   getTokenByID,

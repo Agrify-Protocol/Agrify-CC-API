@@ -3,7 +3,7 @@ const Waitlist = require("../models/waitlist.model");
 const getWaitlist = async (req, res) => {
   try {
     const result = await Waitlist.find({}).sort({ createdAt: -1 }).exec();
-    res.status(201).json({ message: "Waitlist Users", data: result });
+    res.status(200).json({ message: "Waitlist Users", data: result });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

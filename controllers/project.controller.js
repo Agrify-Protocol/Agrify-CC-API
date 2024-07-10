@@ -43,7 +43,7 @@ const getProjects = async (req, res) => {
       sortCriteria = {};
     }
 
-    const projectFields = "title coverImage";
+    const projectFields = "title coverImage projectToken location countryOfOrigin";
     const tagFields = "icon";
     const skip = (page - 1) * limit;
     const projects = await Project.find({}, projectFields)
@@ -174,7 +174,7 @@ const createProject = async (req, res) => {
     res.status(201).json(project);
   } catch (error) {
     console.log(error);
-    res.status(500).json(error);
+    res.status(500).json({ error: error.message });
   }
 };
 
