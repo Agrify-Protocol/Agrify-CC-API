@@ -14,6 +14,7 @@ const {
   createAggregateProject,
   getAllAggregateProjects,
   getProjectsByCategory,
+  getAllProjectCategories,
   addFarmToAggregate,
   getAggregateProjectById,
 } = require("../controllers/aggregate.controller");
@@ -22,7 +23,8 @@ const router = express.Router();
 
 router.get("/projects", authMiddleware, getProjects);
 router.get("/projects/aggregate", authMiddleware, getAllAggregateProjects);
-router.get("/projects/aggregate/:category", authMiddleware, getProjectsByCategory);
+router.get("/projects/aggregate/category/:category", authMiddleware, getProjectsByCategory);
+router.get("/projects/aggregate/category", authMiddleware, getAllProjectCategories);
 router.post(
   "/projects",
   authMiddleware,

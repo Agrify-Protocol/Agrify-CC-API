@@ -36,9 +36,73 @@ const getProjectsByCategory = async (req, res) => {
 
   try {
     const filter = {category: { $in: [category]}};
-    const result = await Aggregate.find(filter).sort({ availableTonnes: -1 }).exec();
-    const total = await Aggregate.countDocuments(filter);
-    res.status(200).json({ message: `List of ${category} farms`, total: total, data: result });
+    const projects = await Aggregate.find(filter).populate({ path: "projectToken"});
+
+      const result = await projects.reduce((acc, product) => {
+        // If the category is already present, update the total price and count
+        const location = `${product.state}, ${product.country}`;
+        if (acc[location]) {
+          acc[location].totalTonnes += product.projectToken.availableTonnes;
+          acc[location].farms+= product.farms.length;
+        } else {
+          // If the category is new, initialize it
+          acc[location] = {projectID: product._id};
+          acc[location].totalTonnes = product.projectToken.availableTonnes;
+          acc[location].farms = product.farms.length;
+        }
+        return acc;
+      }, {});
+    
+    function sumTonnes() {
+      let sum = 0;
+      Object.keys(result).map(category => {
+        const { totalTonnes} = result[category];
+        sum += totalTonnes;
+      });
+      return sum;
+    }
+    
+    const totalTonnes = sumTonnes();
+
+    res.status(200).json({ message: `List of ${category} farms`, "Total Available Credits": totalTonnes, data: result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+const getAllProjectCategories = async (req, res) => {
+
+  try {
+    const projects = await Aggregate.find().populate({ path: "projectToken"});
+
+      const result = await projects.reduce((acc, product) => {
+        // If the category is already present, update the total price and count
+        const location = product.category;
+        if (acc[location]) {
+          acc[location].totalTonnes += product.projectToken.availableTonnes;
+          acc[location].farms+= product.farms.length;
+        } else {
+          // If the category is new, initialize it
+          acc[location] = {totalTonnes: product.projectToken.availableTonnes};
+          acc[location].farms = product.farms.length;
+        }
+        return acc;
+      }, {});
+    
+    function sumTonnes() {
+      let sum = 0;
+      Object.keys(result).map(category => {
+        const { totalTonnes} = result[category];
+        sum += totalTonnes;
+      });
+      return sum;
+    }
+    
+    const totalTonnes = sumTonnes();
+
+    res.status(200).json({ message: `All farms`, "Total Agrify Credits": totalTonnes, data: result });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -68,16 +132,16 @@ const getAllAggregateProjects = async (req, res) => {
       sortCriteria = {};
     }
 
-    const projectFields = "title description availableTonnes";
-    const tagFields = "icon";
+    const projectFields = "title description availableTonnes category";
+    // const tagFields = "icon";
     const skip = (page - 1) * limit;
     const projects = await Aggregate.find({}, projectFields)
       .sort(sortCriteria)
       .skip(skip)
       .limit(parseInt(limit))
       .populate({
-        path: "tags",
-        select: tagFields,
+        path: "farms",
+        select: "name state country category availableTonnes ",
       });
     const total = await Aggregate.countDocuments();
     const totalPages = Math.ceil(total / limit);
@@ -257,6 +321,7 @@ const addFarmToAggregate = async (req, res) => {
 module.exports = {
   createAggregateProject, //TODO: Admin middleware
   getAllAggregateProjects,
+  getAllProjectCategories,
   getProjectsByCategory,
   addFarmToAggregate,
   getAggregateProjectById,
