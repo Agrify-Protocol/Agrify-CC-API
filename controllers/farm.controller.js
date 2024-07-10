@@ -105,13 +105,15 @@ const getFarmByFarmerId = async (req, res) => {
             return res.status(404).json({ message: `Farmer does not exist with ID ${farmerId}` });
         }
 
-        // Find farm by farmer ID
-        const farm = await Farm.findOne({ farmer: farmer._id });
-        if (!farm) {
+        // Find farms by farmer ID
+        const farm = await Farm.find({ farmer: farmer._id }).select(
+            ["name", "country", "category", "lat", "long", "area"]
+        );
+        if (farm.length == 0) {
             return res.status(404).json({ message: `No farm found for farmer ID ${farmerId}` });
         }
-        result = {farmerId: farmerId, farmName: farm.name, farmLocation: farm.country, category: farm.category, latitude: farm.lat ? farm.lat :'', longitude: farm.long ? farm.long : '', area: farm.area ? farm.area : ''};
-        return res.status(200).json({data: result});
+        // result = {farmerId: farmerId, farmName: farm.name, farmLocation: farm.country, category: farm.category, latitude: farm.lat ? farm.lat :'', longitude: farm.long ? farm.long : '', area: farm.area ? farm.area : ''};
+        return res.status(200).json({data: farm});
     } catch (error) {
         return res.status(500).json({ message: `Server error: ${error.message}` });
     }
