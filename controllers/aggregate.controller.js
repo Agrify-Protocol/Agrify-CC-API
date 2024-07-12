@@ -289,7 +289,7 @@ const addFarmToAggregate = async (req, res) => {
       throw new Error(`Farm ${farmID} is not a ${aggregate.category} farm`);
     }
 
-    if (farm.state != aggregate.state && farm.country != aggregate.country) {
+    if (farm.state != aggregate.state || farm.country != aggregate.country) {
       throw new Error(`Farm ${farmID} is not in ${aggregate.state}, ${aggregate.country}`);
     }
 
