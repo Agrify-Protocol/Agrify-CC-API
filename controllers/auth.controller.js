@@ -40,7 +40,23 @@ const register = async (req, res) => {
     const wallet = await walletService.createWallet(user._id);
     user.wallet = wallet;
     await user.save();
-    res.status(201).json({ message: "User account created!" });
+
+
+    //Login tokens
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: "1h",
+    });
+    const refreshToken = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_REFRESH_KEY,
+      { expiresIn: "7d" }
+    );
+    res.status(201).json({
+      message: "User account created!",
+      user,
+      accessToken: token,
+      refreshToken,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
