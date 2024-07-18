@@ -100,12 +100,14 @@ const createFarm = async (req, res) => {
             return res.status(404).json({ message: `User does not have an MRV account!` });
         }
         
-        let farmPhotos = [];
+        let image = {};
         let farmDocs = [];
+        let farmImages = [];
         if (req.files) {
             for (const file of req.files.photos) {
                 const uploadResult = await cloudinary.v2.uploader.upload(file.path);
-                farmPhotos.push(uploadResult.secure_url);
+                image.image = uploadResult.secure_url;
+                farmImages.push(image);
             }
             for (const file of req.files.docs) {
                 const uploadResult = await cloudinary.v2.uploader.upload(file.path);
@@ -123,7 +125,7 @@ const createFarm = async (req, res) => {
         const cat = category.toLowerCase();
 
         const farm = await Farm.create({
-            name, country, address, city, state, farmPhotos, farmDocs, category: cat, availableTonnes, farmer: mrvUser, lat: latitude, long: longitude, area
+            name, country, address, city, state, farmImages, farmDocs, category: cat, availableTonnes, farmer: mrvUser, lat: latitude, long: longitude, area
         });
 
         await farm.save();

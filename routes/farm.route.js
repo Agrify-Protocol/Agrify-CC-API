@@ -10,7 +10,7 @@ const router = express.Router();
 // router.get('/farm', getProjects);
 router.post('/farm', authMiddleware,
     upload.fields([
-        { name: "photos"},
+        { name: "images"},
         { name: "docs", maxCount: 8 },
     ]),
     createFarm);
