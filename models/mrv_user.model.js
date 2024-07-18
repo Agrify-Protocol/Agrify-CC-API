@@ -7,6 +7,7 @@ const mrvUserSchema = new Schema(
     lastname: { type: String },
     email: { type: String, unique: true },
     password: { type: String },
+    phoneNumber: { type: String },
     emailVerificationCode: { type: String },
     emailVerificationCodeExpiration: { type: String },
     isProjectDeveloper: { type: Boolean, default: false },
