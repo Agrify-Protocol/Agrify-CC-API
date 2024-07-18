@@ -94,6 +94,7 @@ const login = async (req, res) => {
 
 const verifyEmailWithToken = async (req, res) => {
   try {
+    // get token
     const { token } = req.body;
     const user = await User.findOne({ verificationToken: token });
     if (user) {
