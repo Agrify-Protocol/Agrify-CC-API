@@ -24,7 +24,7 @@ const getProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { firstname, lastname, profileImage } = req.body;
+    const { firstname, lastname, phoneNumber, profileImage } = req.body;
 
     const mrvUser = await MrvUser.findById(req.userId);
     if (!mrvUser) {
@@ -34,6 +34,7 @@ const updateProfile = async (req, res) => {
     // Update firstname and lastname
     mrvUser.firstname = firstname;
     mrvUser.lastname = lastname;
+    mrvUser.phoneNumber = phoneNumber;
 
     if (profileImage) {
       const uploadImage = await cloudinary.v2.uploader.upload(profileImage, {});
