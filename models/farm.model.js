@@ -24,6 +24,8 @@ const farmSchema = new Schema (
             type: String,
             required: true
         },
+        farmPhotos: [ { type: String, required: true } ],
+        farmDocs: [ { type: String, required: true } ],
         category: {
             type: String,
             enum : ['cassava', 'yam', 'tomato', 'soybean', 'rice', 'maize'],

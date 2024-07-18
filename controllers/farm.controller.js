@@ -2,13 +2,14 @@ const Farm = require("../models/farm.model");
 const MrvUser = require('../models/mrv_user.model');
 const authMiddleWare = require("../middleware/auth")
 const mongoose = require("mongoose");
+const cloudinary = require("../utils/cloudinary.js");
 
 const getFarmById = async (req, res) => {
-    const {id} = req.params;
+    const { id } = req.params;
     try {
         const farm = await Farm.findById(id);
-        if(!farm){
-            return res.status(404).json({message: `Farm with ID: ${id} not found!`});
+        if (!farm) {
+            return res.status(404).json({ message: `Farm with ID: ${id} not found!` });
         }
         return res.status(200).json(farm);
     } catch (error) {
@@ -24,37 +25,37 @@ const getAllFarms = async (req, res) => {
 
         let sortCriteria;
         if (sortBy === "latest") {
-          sortCriteria = { _id: -1 };
+            sortCriteria = { _id: -1 };
         } else if (sortBy === "oldest") {
-          sortCriteria = { _id: 1 };
+            sortCriteria = { _id: 1 };
         } else if (sortBy === "tonnesLeftLowToHigh") {
-          sortCriteria = { availableTonnes: 1 };
+            sortCriteria = { availableTonnes: 1 };
         } else if (sortBy === "tonnesLeftHighToLow") {
-          sortCriteria = { availableTonnes: -1 };
+            sortCriteria = { availableTonnes: -1 };
         } else {
-          sortCriteria = {};
+            sortCriteria = {};
         }
-    
+
         const farmFields = "name category state country availableTonnes";
 
         const skip = (page - 1) * limit;
         const farms = await Farm.find({}, farmFields)
-          .sort(sortCriteria)
-          .skip(skip)
-          .limit(parseInt(limit))
-        //   .populate({
-        //     path: "farmer"
-        //   })
-          ;
+            .sort(sortCriteria)
+            .skip(skip)
+            .limit(parseInt(limit))
+            //   .populate({
+            //     path: "farmer"
+            //   })
+            ;
         const total = await Farm.countDocuments();
         const totalPages = Math.ceil(total / limit);
-    
+
         const nextPage = page < totalPages ? page + 1 : null;
         const prevPage = page < 1 ? page - 1 : null;
-        
+
         res
-        .status(200)
-        .json({ farms, total, page, totalPages, nextPage, prevPage });
+            .status(200)
+            .json({ farms, total, page, totalPages, nextPage, prevPage });
 
     } catch (error) {
         console.log(error);
@@ -64,21 +65,35 @@ const getAllFarms = async (req, res) => {
 const createFarm = async (req, res) => {
     try {
         // find user in MRV Model
-        const mrvUser  = await MrvUser.findById(req.userId);
-        if(!mrvUser){
-            return res.status(404).json({message: `User does not have an MRV account!`});
+        const mrvUser = await MrvUser.findById(req.userId);
+        if (!mrvUser) {
+            return res.status(404).json({ message: `User does not have an MRV account!` });
         }
+        
+        let farmPhotos = [];
+        let farmDocs = [];
+        if (req.files) {
+            for (const file of req.files.photos) {
+                const uploadResult = await cloudinary.v2.uploader.upload(file.path);
+                farmPhotos.push(uploadResult.secure_url);
+            }
+            for (const file of req.files.docs) {
+                const uploadResult = await cloudinary.v2.uploader.upload(file.path);
+                farmDocs.push(uploadResult.secure_url);
+            }
+        }
+
         const {
             name, country, address, city, state, latitude, longitude, area, category, availableTonnes
-            } = req.body;            
-            
+        } = req.body;
+
         // //TODO: Geolocation API
         const farmLocation = "";
-        
+
         const cat = category.toLowerCase();
 
         const farm = await Farm.create({
-            name, country, address, city, state, category: cat, availableTonnes, farmer: mrvUser, lat: latitude, long: longitude, area
+            name, country, address, city, state, farmPhotos, farmDocs, category: cat, availableTonnes, farmer: mrvUser, lat: latitude, long: longitude, area
         });
 
         await farm.save();
@@ -113,7 +128,7 @@ const getFarmByFarmerId = async (req, res) => {
             return res.status(404).json({ message: `No farm found for farmer ID ${farmerId}` });
         }
         // result = {farmerId: farmerId, farmName: farm.name, farmLocation: farm.country, category: farm.category, latitude: farm.lat ? farm.lat :'', longitude: farm.long ? farm.long : '', area: farm.area ? farm.area : ''};
-        return res.status(200).json({data: farm});
+        return res.status(200).json({ data: farm });
     } catch (error) {
         return res.status(500).json({ message: `Server error: ${error.message}` });
     }
@@ -121,4 +136,4 @@ const getFarmByFarmerId = async (req, res) => {
 
 
 
-module.exports = {createFarm, getFarmById, getFarmByFarmerId, getAllFarms};
+module.exports = { createFarm, getFarmById, getFarmByFarmerId, getAllFarms };
