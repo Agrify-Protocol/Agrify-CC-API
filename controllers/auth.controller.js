@@ -29,18 +29,17 @@ const register = async (req, res) => {
       password: hashPassword,
     });
     const [hederaAccountID, hederaPublicKey, hederaPrivateKey] =
-    await hederaService.createHederaAccount();
+      await hederaService.createHederaAccount();
 
     user.hederaAccountID = hederaAccountID;
     user.hederaPublicKey = hederaPublicKey;
     //TODO: Encrypt
     user.hederaPrivateKey = hederaPrivateKey;
 
-    //Create wallet 
+    //Create wallet
     const wallet = await walletService.createWallet(user._id);
     user.wallet = wallet;
     await user.save();
-
 
     //Login tokens
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
@@ -95,7 +94,6 @@ const login = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 const verifyEmailWithToken = async (req, res) => {
   try {
@@ -206,4 +204,5 @@ module.exports = {
   requestResetPassword,
   resetPassword,
   refreshtoken,
+  verifyEmailWithToken,
 };
