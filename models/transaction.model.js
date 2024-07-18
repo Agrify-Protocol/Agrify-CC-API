@@ -16,8 +16,7 @@ const transactionSchema = new Schema(
     },
     amount: {
       type: Number,
-      required: true,
-      default: 0.00
+      required: true
     },
     walletId: {
       type: String,
