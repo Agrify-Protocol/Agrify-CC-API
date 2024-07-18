@@ -96,6 +96,28 @@ const login = async (req, res) => {
   }
 };
 
+
+const verifyEmailWithToken = async (req, res) => {
+  try {
+    // get token
+    const { token } = req.body;
+    const user = await User.findOne({ verificationToken: token });
+    if (user) {
+      user.verificationToken = undefined;
+      user.isEmailVerified = true;
+
+      await user.save();
+    }
+
+    res
+      .status(200)
+      .json({ user: user, message: "Email Verified Successfully" });
+  } catch (error) {
+    console.log("Error verify_email(): ", error);
+    res.status(500).json({ success: false, message: "Failed to verify email" });
+  }
+};
+
 const requestResetPassword = async (req, res) => {
   try {
     const { email } = req.body;
