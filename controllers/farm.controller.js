@@ -17,6 +17,36 @@ const getFarmById = async (req, res) => {
     }
 }
 
+const addImageToGallery = async (req, res) => {
+    const { farmID } = req.params;
+    
+    try {
+        const farm = await Farm.findById(farmID);
+        if (!farm) {
+            return res.status(404).json({ message: `Farm with ID: ${farmID} not found!` });
+        }
+        let image = {};
+        const { description } = req.body;
+        if (req.files) {
+            if (req.files.image.length > 1)
+                {
+                    return res.status(400).json({ message: `Upload one image at a time!` });
+                }
+                const file = req.files.image[0];
+                const uploadResult = await cloudinary.v2.uploader.upload(file.path);
+                image.image = uploadResult.secure_url;
+                image.description = description;
+                farm.farmImages.push(image);
+            await farm.save();
+            return res.status(200).json(farm);
+        }
+
+        return res.status(500).json({ error: "Something went wrong" });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 const getAllFarms = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -136,4 +166,4 @@ const getFarmByFarmerId = async (req, res) => {
 
 
 
-module.exports = { createFarm, getFarmById, getFarmByFarmerId, getAllFarms };
+module.exports = { createFarm, getFarmById, getFarmByFarmerId, getAllFarms, addImageToGallery };
