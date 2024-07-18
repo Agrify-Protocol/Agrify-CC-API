@@ -24,11 +24,20 @@ const farmSchema = new Schema(
             type: String,
             required: true
         },
-        farmDocs: [ { type: String, required: true } ],
+        farmDocs: [{ type: String, required: true }],
         farmImages: [
             {
+                _id: false,
                 image: { type: String, required: true },
                 description: { type: String, required: false },
+            },
+        ],
+        milestones: [
+            {
+                _id: false,
+                title: { type: String, required: true },
+                funding: { type: Number, required: true },
+                duration: { type: Number, required: true },
             },
         ],
         category: {
