@@ -9,13 +9,15 @@ const userSchema = new Schema(
     password: { type: String },
     isAdmin: { type: Boolean, default: false },
     isBuyer: { type: Boolean, default: true },
+    verificationToken: { type: String },
+    isEmailVerified: { type: Boolean, default: false },
     hederaAccountID: { type: String },
     hederaPublicKey: { type: String },
     hederaPrivateKey: { type: String },
-    wallet: {       
+    wallet: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Wallet",
- },
+    },
   },
   {
     timestamps: true,

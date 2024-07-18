@@ -28,19 +28,31 @@ const register = async (req, res) => {
       email,
       password: hashPassword,
     });
+
+    let verifyToken = crypto.randomBytes(32).toString("hex");
+    // const hash = await bcrypt.hash(verifyToken, 10);
+    user.verificationToken = verifyToken;
+
     const [hederaAccountID, hederaPublicKey, hederaPrivateKey] =
-    await hederaService.createHederaAccount();
+      await hederaService.createHederaAccount();
 
     user.hederaAccountID = hederaAccountID;
     user.hederaPublicKey = hederaPublicKey;
     //TODO: Encrypt
     user.hederaPrivateKey = hederaPrivateKey;
 
-    //Create wallet 
+    //Create wallet
     const wallet = await walletService.createWallet(user._id);
     user.wallet = wallet;
     await user.save();
-    res.status(201).json({ message: "User account created!" });
+    const welcomeLink = `${process.env.CLIENT_URL}/emailVerify?token=${verifyToken}`;
+    sendEmail(
+      user.email,
+      "Welcome to Agrify Marketplace",
+      { name: user.firstname, welcomeLink },
+      "./email/template/welcome.handlebars"
+    );
+    res.status(201).json({ message: "User account created!", data: { user } });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -77,6 +89,26 @@ const login = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+const verifyEmailWithToken = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const user = await User.findOne({ verificationToken: token });
+    if (user) {
+      user.verificationToken = undefined;
+      user.isEmailVerified = true;
+
+      await user.save();
+    }
+
+    res
+      .status(200)
+      .json({ user: user, message: "Email Verified Successfully" });
+  } catch (error) {
+    console.log("Error verify_email(): ", error);
+    res.status(500).json({ success: false, message: "Failed to verify email" });
   }
 };
 
@@ -168,4 +200,5 @@ module.exports = {
   requestResetPassword,
   resetPassword,
   refreshtoken,
+  verifyEmailWithToken,
 };
