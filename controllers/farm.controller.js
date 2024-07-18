@@ -120,7 +120,7 @@ const createFarm = async (req, res) => {
         let farmDocs = [];
         let farmImages = [];
         if (req.files) {
-            for (const file of req.files.photos) {
+            for (const file of req.files.images) {
                 const uploadResult = await cloudinary.v2.uploader.upload(file.path);
                 image.image = uploadResult.secure_url;
                 farmImages.push(image);
