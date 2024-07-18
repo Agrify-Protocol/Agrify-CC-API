@@ -29,8 +29,7 @@ const register = async (req, res) => {
     });
 
     let verifyToken = crypto.randomBytes(32).toString("hex");
-    const hash = await bcrypt.hash(verifyToken, 10);
-    mrvUser.verificationToken = hash;
+    mrvUser.verificationToken = verifyToken;
     const [hederaAccountID, hederaPublicKey, hederaPrivateKey] =
       await hederaService.createHederaAccount();
     mrvUser.hederaAccountID = hederaAccountID;
@@ -38,7 +37,7 @@ const register = async (req, res) => {
     //TODO: Encrypt
     mrvUser.hederaPrivateKey = hederaPrivateKey;
 
-    //Create wallet 
+    //Create wallet
     const wallet = await walletService.createWallet(mrvUser._id);
     mrvUser.wallet = wallet;
     await mrvUser.save();
