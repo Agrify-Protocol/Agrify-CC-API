@@ -5,7 +5,7 @@ const cloudinary = require("../../utils/cloudinary");
 
 const getProfile = async (req, res) => {
   try {
-    const mrvUser = await MrvUser.findById(req.userId).populate("wallet", { currency: 1, balance: 1});
+    const mrvUser = await MrvUser.findById(req.userId).populate("wallet", { currency: 1, balance: 1 });
 
     const profileData = {
       _id: mrvUser._id,
@@ -32,10 +32,13 @@ const updateProfile = async (req, res) => {
     }
 
     // Update firstname and lastname
-    mrvUser.firstname = firstname;
-    mrvUser.lastname = lastname;
-    mrvUser.phoneNumber = phoneNumber;
-
+    if (firstname) {
+      mrvUser.firstname = firstname;
+    }
+    if (lastname) { mrvUser.lastname = lastname; }
+    if (phoneNumber) {
+      mrvUser.phoneNumber = phoneNumber;
+    }
     if (profileImage) {
       const uploadImage = await cloudinary.v2.uploader.upload(profileImage, {});
       mrvUser.profileImageUrl = uploadImage.secure_url;
