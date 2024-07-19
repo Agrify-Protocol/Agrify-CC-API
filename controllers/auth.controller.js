@@ -28,6 +28,9 @@ const register = async (req, res) => {
       email,
       password: hashPassword,
     });
+
+    let verifyToken = crypto.randomBytes(32).toString("hex");
+    user.verificationToken = verifyToken;
     const [hederaAccountID, hederaPublicKey, hederaPrivateKey] =
       await hederaService.createHederaAccount();
 
@@ -49,6 +52,16 @@ const register = async (req, res) => {
       { userId: user._id },
       process.env.JWT_REFRESH_KEY,
       { expiresIn: "7d" }
+    );
+    const welcomeLink = `${process.env.CLIENT_URL}/emailVerify?token=${verifyToken}`;
+    sendEmail(
+      user.email,
+      "Welcome to Agrify",
+      {
+        name: user.firstname,
+        welcomeLink,
+      },
+      "./email/template/welcome.handlebars"
     );
     res.status(201).json({
       message: "User account created!",
