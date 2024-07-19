@@ -8,6 +8,14 @@ const farmSchema = new Schema(
             type: String,
             required: true
         },
+        description: {
+            type: String,
+            required: true
+        },
+        cultivationType: {
+            type: String,
+            required: true
+        },
         country: {
             type: String,
             required: true

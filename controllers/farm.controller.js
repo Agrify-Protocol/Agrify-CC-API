@@ -136,7 +136,7 @@ const createFarm = async (req, res) => {
         }
 
         const {
-            name, country, address, city, state, latitude, longitude, area, category, availableTonnes
+            name, description, cultivationType, country, address, city, state, latitude, longitude, area, category, availableTonnes
         } = req.body;
 
         // //TODO: Geolocation API
@@ -145,7 +145,7 @@ const createFarm = async (req, res) => {
         const cat = category.toLowerCase();
 
         const farm = await Farm.create({
-            name, country: country == "NG"? "Nigeria": country, address, city, state, farmImages, farmDocs, category: cat, availableTonnes, farmer: mrvUser, lat: latitude, long: longitude, area
+            name, description, cultivationType, country: country == "NG"? "Nigeria": country, address, city, state, farmImages, farmDocs, category: cat, availableTonnes, farmer: mrvUser, lat: latitude, long: longitude, area
         });
 
         await farm.save();
