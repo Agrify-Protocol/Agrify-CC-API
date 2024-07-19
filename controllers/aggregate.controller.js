@@ -17,7 +17,7 @@ const getAggregateProjectById = async (req, res) => {
       path: "farms",
       select: farmFields,
     }).populate({ path: "projectToken" })
-    .sort( { availableTonnes: -1 });
+      .sort({ availableTonnes: -1 });
     if (!project) {
       return res
         .status(404)
@@ -35,36 +35,40 @@ const getProjectsByCategory = async (req, res) => {
   const { category } = req.params;
 
   try {
-    const filter = {category: { $in: [category]}};
-    const projects = await Aggregate.find(filter).populate({ path: "projectToken"});
+    const filter = { category: { $in: [category] } };
+    const projects = await Aggregate.find(filter).populate({ path: "projectToken" });
+    const resultList = [];
 
-      const result = await projects.reduce((acc, product) => {
-        // If the category is already present, update the total price and count
-        const location = `${product.state}, ${product.country}`;
-        if (acc[location]) {
-          acc[location].totalTonnes += product.projectToken.availableTonnes;
-          acc[location].farms+= product.farms.length;
-        } else {
-          // If the category is new, initialize it
-          acc[location] = {projectID: product._id};
-          acc[location].totalTonnes = product.projectToken.availableTonnes;
-          acc[location].farms = product.farms.length;
-        }
-        return acc;
-      }, {});
-    
+    const result = await projects.reduce((acc, product) => {
+      // If the category is already present, update the total price and count
+      const location = `${product.state}, ${product.country}`;
+      if (acc[location]) {
+        acc[location].totalTonnes += product.projectToken.availableTonnes;
+        acc[location].farms += product.farms.length;
+      } else {
+        // If the category is new, initialize it
+        acc[location] = { projectID: product._id };
+        acc[location].state = product.state;
+        acc[location].country = product.country;
+        acc[location].totalTonnes = product.projectToken.availableTonnes;
+        acc[location].farms = product.farms.length;
+        resultList.push(acc[location]);
+      }
+      return acc;
+    }, {});
+
     function sumTonnes() {
       let sum = 0;
       Object.keys(result).map(category => {
-        const { totalTonnes} = result[category];
+        const { totalTonnes } = result[category];
         sum += totalTonnes;
       });
       return sum;
     }
-    
+
     const totalTonnes = sumTonnes();
 
-    res.status(200).json({ message: `List of ${category} farms`, "Total Available Credits": totalTonnes, data: result });
+    res.status(200).json({ message: `List of ${category} farms`, "Total Available Credits": totalTonnes, data: resultList });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -75,34 +79,39 @@ const getProjectsByCategory = async (req, res) => {
 const getAllProjectCategories = async (req, res) => {
 
   try {
-    const projects = await Aggregate.find().populate({ path: "projectToken"});
+    const projects = await Aggregate.find().populate({ path: "projectToken" });
 
-      const result = await projects.reduce((acc, product) => {
-        // If the category is already present, update the total price and count
-        const location = product.category;
-        if (acc[location]) {
-          acc[location].totalTonnes += product.projectToken.availableTonnes;
-          acc[location].farms+= product.farms.length;
-        } else {
-          // If the category is new, initialize it
-          acc[location] = {totalTonnes: product.projectToken.availableTonnes};
-          acc[location].farms = product.farms.length;
-        }
-        return acc;
-      }, {});
-    
+    const resultList = [];
+
+    const result = await projects.reduce((acc, product) => {
+      // If the category is already present, update the total price and count
+      const location = product.category;
+      if (acc[location]) {
+        acc[location].totalTonnes += product.projectToken.availableTonnes;
+        acc[location].farms += product.farms.length;
+      } else {
+        // If the category is new, initialize it
+        acc[location] = { totalTonnes: product.projectToken.availableTonnes };
+        acc[location].farms = product.farms.length;
+        acc[location].category = product.category;
+
+        resultList.push(acc[location]);
+      }
+      return acc;
+    }, {});
+
     function sumTonnes() {
       let sum = 0;
       Object.keys(result).map(category => {
-        const { totalTonnes} = result[category];
+        const { totalTonnes } = result[category];
         sum += totalTonnes;
       });
       return sum;
     }
-    
+
     const totalTonnes = sumTonnes();
 
-    res.status(200).json({ message: `All farms`, "Total Agrify Credits": totalTonnes, data: result });
+    res.status(200).json({ message: `All farms`, "Total Agrify Credits": totalTonnes, data: resultList });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -239,7 +248,7 @@ const createAggregateProject = async (req, res) => {
       images: uploadedImages,
       location: `${state}, ${country}`,
       state,
-      country: country == "NG"? "Nigeria": country,
+      country: country == "NG" ? "Nigeria" : country,
       category: category.toLowerCase(),
       creditStartDate: convertStringToDate(creditStartDate),
       creditEndDate: convertStringToDate(creditEndDate),
