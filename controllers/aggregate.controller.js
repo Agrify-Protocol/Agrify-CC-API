@@ -176,17 +176,23 @@ const createAggregateProject = async (req, res) => {
     const aggregateId = generateProjectID();
     // console.log(req.files);
     let uploadedImages = [];
+    let image = {};
     let coverImage;
     let supportingDocumentLink;
-    if (req.files) {
+    if (req.files.images) {
       for (const file of req.files.images) {
         const uploadResult = await cloudinary.v2.uploader.upload(file.path);
-        uploadedImages.push(uploadResult.secure_url);
+        image.image = uploadResult.secure_url;
+        uploadedImages.push(image);
       }
+    }
+    if (req.files.cover) {
       const coverImageUpload = await cloudinary.v2.uploader.upload(
         req.files.cover[0].path
       );
       coverImage = coverImageUpload.secure_url;
+    }
+    if (req.files.supdoc) {
       const supportingDocumentLinkUpload = await cloudinary.v2.uploader.upload(
         req.files.supdoc[0].path
       );

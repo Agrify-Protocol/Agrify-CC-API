@@ -14,6 +14,7 @@ const mrvUserSchema = new Schema(
     isFarmer: { type: Boolean, default: true },
     isVerifier: { type: Boolean, default: false },
     isEmailVerified: { type: Boolean, default: false },
+    farmID: { type: String },
     verificationToken: { type: String },
     profileImageUrl: { type: String },
     hederaAccountID: { type: String },
