@@ -239,7 +239,7 @@ const createAggregateProject = async (req, res) => {
       images: uploadedImages,
       location: `${state}, ${country}`,
       state,
-      country,
+      country: country == "NG"? "Nigeria": country,
       category: category.toLowerCase(),
       creditStartDate: convertStringToDate(creditStartDate),
       creditEndDate: convertStringToDate(creditEndDate),

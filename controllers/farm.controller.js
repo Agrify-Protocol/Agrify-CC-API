@@ -145,7 +145,7 @@ const createFarm = async (req, res) => {
         const cat = category.toLowerCase();
 
         const farm = await Farm.create({
-            name, country, address, city, state, farmImages, farmDocs, category: cat, availableTonnes, farmer: mrvUser, lat: latitude, long: longitude, area
+            name, country: country == "NG"? "Nigeria": country, address, city, state, farmImages, farmDocs, category: cat, availableTonnes, farmer: mrvUser, lat: latitude, long: longitude, area
         });
 
         await farm.save();
