@@ -116,6 +116,10 @@ const createFarm = async (req, res) => {
             return res.status(404).json({ message: `User does not have an MRV account!` });
         }
 
+        if (mrvUser.farmID) {
+            return res.status(400).json({ message: `User already has a farm!` });
+        }
+
         let image = {};
         let farmDocs = [];
         let farmImages = [];
@@ -145,6 +149,8 @@ const createFarm = async (req, res) => {
         });
 
         await farm.save();
+        mrvUser.farmID = farm._id;
+        await mrvUser.save();
         res.status(201).json(farm);
     } catch (error) {
         console.log(error);
@@ -170,7 +176,7 @@ const getFarmByFarmerId = async (req, res) => {
 
         // Find farms by farmer ID
         const farm = await Farm.find({ farmer: farmer._id }).select(
-            ["name", "country", "category", "lat", "long", "area"]
+            ["name", "state", "country", "category", "lat", "long", "area"]
         );
         if (farm.length == 0) {
             return res.status(404).json({ message: `No farm found for farmer ID ${farmerId}` });
