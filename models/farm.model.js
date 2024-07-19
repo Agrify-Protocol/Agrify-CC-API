@@ -53,7 +53,7 @@ const farmSchema = new Schema(
         },
         area: { type: Number },
         farmer: { type: mongoose.Schema.Types.ObjectId, ref: 'MrvUser' },
-        availableTonnes: { type: Number },
+        availableTonnes: { type: Number, required: true },
 
     },
     { timestamps: true }

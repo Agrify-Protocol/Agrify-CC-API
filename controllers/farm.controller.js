@@ -116,9 +116,9 @@ const createFarm = async (req, res) => {
             return res.status(404).json({ message: `User does not have an MRV account!` });
         }
 
-        // if (mrvUser.farmID) {
-        //     return res.status(400).json({ message: `User already has a farm!` });
-        // }
+        if (mrvUser.farmID) {
+            return res.status(400).json({ message: `User already has a farm!` });
+        }
 
         let image = {};
         let farmDocs = [];
@@ -145,12 +145,12 @@ const createFarm = async (req, res) => {
         const cat = category.toLowerCase();
 
         const farm = await Farm.create({
-            name, country, address, city, state, farmImages, farmDocs, category: cat, availableTonnes, farmer: mrvUser, lat: latitude, long: longitude, area
+            name, country: country == "NG"? "Nigeria": country, address, city, state, farmImages, farmDocs, category: cat, availableTonnes, farmer: mrvUser, lat: latitude, long: longitude, area
         });
 
         await farm.save();
-        // mrvUser.farmID = farm._id;
-        // await mrvUser.save();
+        mrvUser.farmID = farm._id;
+        await mrvUser.save();
         res.status(201).json(farm);
     } catch (error) {
         console.log(error);
