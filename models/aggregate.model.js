@@ -16,6 +16,14 @@ const aggregateSchema = new Schema(
       type: String,
       required: true,
     },
+    mission: {
+      type: String,
+      required: true,
+    },
+    methodology: {
+      type: String,
+      required: true,
+    },
     // price: {
     //   type: Number,
     //   required: true,
@@ -57,12 +65,12 @@ const aggregateSchema = new Schema(
     },
     latitude: {
       type: Number,
-      // required: true
+      required: true
     },
     longitude: {
       type: Number,
-      // required: true,
-    },
+      required: true,
+    },  
     state: {
       type: String,
       required: true,

@@ -8,6 +8,14 @@ const farmSchema = new Schema(
             type: String,
             required: true
         },
+        description: {
+            type: String,
+            required: true
+        },
+        cultivationType: {
+            type: String,
+            required: true
+        },
         country: {
             type: String,
             required: true
@@ -53,10 +61,21 @@ const farmSchema = new Schema(
         },
         area: { type: Number },
         farmer: { type: mongoose.Schema.Types.ObjectId, ref: 'MrvUser' },
+        farmSuggestion: { type: mongoose.Schema.Types.ObjectId, ref: 'FarmSuggestion' },
+        soilData: { type: mongoose.Schema.Types.ObjectId, ref: 'SoilData' },
         availableTonnes: { type: Number, required: true },
 
     },
-    { timestamps: true }
+    { timestamps: true,
+        toJSON: {
+            transform: function (doc, ret) {
+              delete ret.__v;
+              delete ret.createdAt;
+              delete ret.updatedAt;
+            },
+          },
+      
+     }
 );
 
 module.exports = mongoose.model("Farm", farmSchema);

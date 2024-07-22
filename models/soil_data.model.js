@@ -23,7 +23,17 @@ const soilDataSchema = new Schema(
     BulkDensity: { type: String, required: true },
     Area: { type: Number, required: true },
   },
-  { timestamps: true }
+  { timestamps: true,
+    toJSON: {
+      transform: function (doc, ret) {
+        delete ret.__v;
+        delete ret._id;
+        delete ret.createdAt;
+        delete ret.updatedAt;
+      },
+    },
+
+   }
 );
 
 module.exports = mongoose.model("SoilData", soilDataSchema);
