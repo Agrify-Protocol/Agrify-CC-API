@@ -1,5 +1,6 @@
 const Invoice = require("../models/invoice.model");
 const Project = require("../models/project.model");
+const Purchase = require("../models/purchase.model");
 const User = require("../models/user.model");
 
 const createInvoice = async (req, res) => {
@@ -19,7 +20,18 @@ const createInvoice = async (req, res) => {
       ...req.body,
       userId, // Attach the logged-in user's ID to the invoice
     });
+    const purchase = new Purchase({
+      purchaseType: "invoice",
+      status: "pending",
+      tonnes: req.body.quantity,
+      projectId,
+      invoiceId: invoice._id,
+      userId,
+    });
     await invoice.save();
+    await purchase.save();
+
+    // refactor to use await
     res.status(201).json(invoice);
   } catch (error) {
     res.status(500).json({ message: `Server Error: ${error.message}` });
