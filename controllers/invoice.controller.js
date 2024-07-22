@@ -71,6 +71,18 @@ const getAllInvoices = async (req, res) => {
   }
 };
 
+const getAllInvoicesForProject = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { projectId } = req.params;
+    const invoicesForProject = await Invoice.find({
+      userId,
+      projectId,
+    }).populate("projectId");
+    res.status(200).json(invoicesForProject);
+  } catch (error) {}
+};
+
 const getInvoice = async (req, res) => {
   try {
     const { invoiceId } = req.params;
@@ -113,4 +125,5 @@ module.exports = {
   getAllInvoices,
   getInvoice,
   cancelInvoice,
+  getAllInvoicesForProject,
 };
