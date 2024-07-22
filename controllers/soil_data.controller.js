@@ -25,6 +25,8 @@ const createSoilData = async (req, res) => {
     // Create new soil data entry
     const soilData = await SoilData.create(req.body);
     await soilData.save();
+    farm.soilData = soilData;
+    await farm.save();
     res.status(201).json(soilData);
   } catch (error) {
     res.status(500).json({ message: `Server error: ${error.message}` });
