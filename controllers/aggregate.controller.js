@@ -1,4 +1,5 @@
 const Project = require("../models/project.model.js");
+const BulkOrder = require("../models/bulk_order.model.js");
 const Aggregate = require("../models/aggregate.model.js");
 const Token = require("../models/token.model.js");
 const Farm = require("../models/farm.model.js");
@@ -285,6 +286,83 @@ const createAggregateProject = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const preorderFarmProduce = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      amount,
+      name,
+      phoneNumber,
+      address
+     } = req.body;
+
+    const order = await BulkOrder.create({
+      amount,
+      name,
+      phoneNumber,
+      address,
+      projectID: id
+    });
+
+    res.status(201).json({ message: "Order placed successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+const getAllPreOrders = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const sortBy = req.query.sortBy || "latest";
+
+    let sortCriteria;
+    if (sortBy === "latest") {
+      sortCriteria = { _id: -1 };
+    } else if (sortBy === "oldest") {
+      sortCriteria = { _id: 1 };
+    } else {
+      sortCriteria = {};
+    }
+
+    const skip = (page - 1) * limit;
+    const orders = await BulkOrder.find({})
+      .sort(sortCriteria)
+      .skip(skip)
+      .limit(parseInt(limit));
+    const total = await BulkOrder.countDocuments();
+    const totalPages = Math.ceil(total / limit);
+
+    const nextPage = page < totalPages ? page + 1 : null;
+    const prevPage = page < 1 ? page - 1 : null;
+
+    res
+      .status(200)
+      .json({ orders, total, page, totalPages, nextPage, prevPage });
+  } catch (error) {
+    console.log("Error fetching orders:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+const getOrderById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const order = await BulkOrder.findById(id);
+    if (!order) {
+      return res
+        .status(404)
+        .json({ message: `Order with ID: ${id} not found!` });
+    }
+    return res.status(200).json(order);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 
 const addFarmToAggregate = async (req, res) => {
   const { farmID, projectID } = req.body;
@@ -348,4 +426,7 @@ module.exports = {
   getProjectsByCategory,
   addFarmToAggregate,
   getAggregateProjectById,
+  preorderFarmProduce,
+  getAllPreOrders,
+  getOrderById,
 };

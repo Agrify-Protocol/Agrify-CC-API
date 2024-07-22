@@ -49,6 +49,8 @@ const createFarmSuggestion = async (req, res) => {
     // create a new farm suggestion entry
     const farmSuggestion = await FarmSuggestion.create(farmSuggestionData);
     await farmSuggestion.save();
+    farm.farmSuggestion = farmSuggestion;
+    await farm.save();
     res.status(201).json(farmSuggestion);
   } catch (error) {
     res.status(500).json({ message: `Server Error: ${error.message}` });
@@ -58,11 +60,16 @@ const createFarmSuggestion = async (req, res) => {
 const getLatestFarmSuggestion = async (req, res) => {
   try {
     const { farmId } = req.params;
+    const farm = await farmModel.findById(farmId);
     const farmSuggestion = await FarmSuggestion.findOne({
       FarmId: farmId,
     }).sort({
       createdAt: -1,
     });
+    if (farmSuggestion != farm.farmSuggestion){
+      farm.farmSuggestion = farmSuggestion;
+      await farm.save();
+    }
     res.status(200).json(farmSuggestion);
   } catch (error) {
     if (!farmSuggestion) {

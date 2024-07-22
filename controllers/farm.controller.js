@@ -7,7 +7,7 @@ const cloudinary = require("../utils/cloudinary.js");
 const getFarmById = async (req, res) => {
     const { id } = req.params;
     try {
-        const farm = await Farm.findById(id);
+        const farm = await Farm.findById(id).populate({path: "farmSuggestion"}).populate({path: "soilData"});
         if (!farm) {
             return res.status(404).json({ message: `Farm with ID: ${id} not found!` });
         }

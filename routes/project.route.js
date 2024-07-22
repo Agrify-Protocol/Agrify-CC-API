@@ -17,6 +17,9 @@ const {
   getAllProjectCategories,
   addFarmToAggregate,
   getAggregateProjectById,
+  preorderFarmProduce,
+  getAllPreOrders,
+  getOrderById,
 } = require("../controllers/aggregate.controller");
 
 const router = express.Router();
@@ -47,6 +50,10 @@ router.post(
 );
 router.get("/projects/:id", authMiddleware, getProjectById);
 router.get("/projects/aggregate/:id", authMiddleware, getAggregateProjectById);
+
+router.post("/preorder/:id", authMiddleware, preorderFarmProduce);
+router.get("/preorders", authMiddleware, getAllPreOrders);
+router.get("/preorders/:id", authMiddleware, getOrderById);
 
 router.post("/projects/addFarm", addFarmToAggregate);
 router.post("/seed-projects", seedProjects);
