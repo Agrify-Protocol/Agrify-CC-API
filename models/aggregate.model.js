@@ -114,6 +114,10 @@ const aggregateSchema = new Schema(
     supportingDocument: {
       type: String,
     },
+    contractType: {
+      type: String,
+      required: true,
+    },
     projectToken: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Token",
