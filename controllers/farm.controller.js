@@ -17,6 +17,38 @@ const getFarmById = async (req, res) => {
     }
 }
 
+const deleteFarmUnsafe = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const farm = await Farm.findById(id);
+        if (!farm) {
+            return res.status(404).json({ message: `Farm with ID: ${id} not found!` });
+        }
+        await farm.deleteOne();
+        return res.status(200).json({message: "Deleted"});
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const updateFarmUnsafe = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const farm = await Farm.findById(id);
+        if (!farm) {
+            return res.status(404).json({ message: `Farm with ID: ${id} not found!` });
+        }
+        const { description, cultivationType } = req.body;
+
+        farm.description = description;
+        farm.cultivationType = cultivationType;
+        await farm.save();
+        return res.status(200).json(farm);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 const addImageToGallery = async (req, res) => {
     const { farmID } = req.params;
 
@@ -158,6 +190,52 @@ const createFarm = async (req, res) => {
     }
 };
 
+const createFarmUnsafe = async (req, res) => {
+    try {
+        // find user in MRV Model
+        const mrvUser = await MrvUser.findById(req.userId);
+        if (!mrvUser) {
+            return res.status(404).json({ message: `User does not have an MRV account!` });
+        }
+
+        let image = {};
+        let farmDocs = [];
+        let farmImages = [];
+        if (req.files) {
+            for (const file of req.files.images) {
+                const uploadResult = await cloudinary.v2.uploader.upload(file.path);
+                image.image = uploadResult.secure_url;
+                farmImages.push(image);
+            }
+            for (const file of req.files.docs) {
+                const uploadResult = await cloudinary.v2.uploader.upload(file.path);
+                farmDocs.push(uploadResult.secure_url);
+            }
+        }
+
+        const {
+            name, description, cultivationType, country, address, city, state, latitude, longitude, area, category, availableTonnes
+        } = req.body;
+
+        // //TODO: Geolocation API
+        const farmLocation = "";
+
+        const cat = category.toLowerCase();
+
+        const farm = await Farm.create({
+            name, description, cultivationType, country: country == "NG"? "Nigeria": country, address, city, state, farmImages, farmDocs, category: cat, availableTonnes, farmer: mrvUser, lat: latitude, long: longitude, area
+        });
+
+        await farm.save();
+        mrvUser.farmID = farm._id;
+        await mrvUser.save();
+        res.status(201).json(farm);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
 const getFarmByFarmerId = async (req, res) => {
     let result = {};
     const { farmerId } = req.params;
@@ -190,4 +268,4 @@ const getFarmByFarmerId = async (req, res) => {
 
 
 
-module.exports = { createFarm, getFarmById, getFarmByFarmerId, getAllFarms, addImageToGallery, addProjectMilestones };
+module.exports = { createFarm, createFarmUnsafe, deleteFarmUnsafe, updateFarmUnsafe, getFarmById, getFarmByFarmerId, getAllFarms, addImageToGallery, addProjectMilestones };
