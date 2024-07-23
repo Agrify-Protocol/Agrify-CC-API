@@ -12,6 +12,7 @@ const {
 
 const {
   createAggregateProject,
+  deleteUnsafe,
   getAllAggregateProjects,
   getProjectsByCategory,
   getAllProjectCategories,
@@ -50,6 +51,7 @@ router.post(
 );
 router.get("/projects/:id", authMiddleware, getProjectById);
 router.get("/projects/aggregate/:id", authMiddleware, getAggregateProjectById);
+router.delete("/projects/aggregate/:id", authMiddleware, deleteUnsafe);
 
 router.post("/preorder/:id", authMiddleware, preorderFarmProduce);
 router.get("/preorders", authMiddleware, getAllPreOrders);
