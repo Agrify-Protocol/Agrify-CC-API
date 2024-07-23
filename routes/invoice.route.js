@@ -7,6 +7,7 @@ const {
   getInvoice,
   cancelInvoice,
   getAllInvoices,
+  getAllInvoicesForProject,
 } = require("../controllers/invoice.controller");
 const authMiddleware = require("../middleware/auth");
 
@@ -16,5 +17,10 @@ router.post("/:invoiceId/pay", authMiddleware, payInvoice);
 router.put("/:invoiceId/", authMiddleware, updateInvoice);
 router.get("/:invoiceId", authMiddleware, getInvoice);
 router.post("/:invoiceId/cancel", authMiddleware, cancelInvoice);
+router.get(
+  "/get-by-project/:projectId",
+  authMiddleware,
+  getAllInvoicesForProject
+);
 
 module.exports = router;
