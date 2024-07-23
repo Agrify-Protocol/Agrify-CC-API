@@ -1,6 +1,6 @@
 // Handling Paystack
 
-const paystackSkey = "sk_test_0a57f7a01327899f9a2f3a54974c4d4c4078ef84";
+const paystackSkey = process.env.PAYSTACK_SECRET_KEY;
 const axios = require("axios");
 const Invoice = require("../models/invoice.model");
 const Purchase = require("../models/purchase.model");
