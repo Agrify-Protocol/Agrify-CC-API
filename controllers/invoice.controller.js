@@ -16,9 +16,12 @@ const createInvoice = async (req, res) => {
         .json({ message: `Project does not exist with ID ${projectId}` });
     }
 
+    const invoiceNumber = await generateUniqueInvoiceNumber();
+
     const invoice = new Invoice({
       ...req.body,
       userId, // Attach the logged-in user's ID to the invoice
+      invoiceNo: invoiceNumber,
     });
     const purchase = new Purchase({
       purchaseType: "invoice",
@@ -36,6 +39,24 @@ const createInvoice = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: `Server Error: ${error.message}` });
   }
+};
+
+const generateUniqueInvoiceNumber = async () => {
+  const datePart = new Date().toISOString().split("T")[0].replace(/-/g, "");
+  const randomPart = Math.random().toString(10).substring(2, 7).toUpperCase();
+
+  let invoiceNumber = `AGR-INV-${datePart}-${randomPart}`;
+
+  const existingInvoice = await Invoice.findOne({ invoiceNo: invoiceNumber });
+  while (existingInvoice) {
+    const newRandomPart = Math.random()
+      .toString(10)
+      .substring(2, 7)
+      .toUpperCase();
+    invoiceNumber = `AGR-INV-${datePart}-${randomPart}`;
+  }
+
+  return invoiceNumber;
 };
 
 const payInvoice = async (req, res) => {
