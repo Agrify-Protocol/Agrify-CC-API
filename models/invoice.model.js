@@ -28,6 +28,7 @@ const invoiceSchema = new Schema(
     address: { type: String, required: true },
     contactNo: { type: String, required: true },
     issuedOn: { type: Date, default: Date.now },
+    paymentReference: { type: String },
   },
   { timestamps: true }
 );

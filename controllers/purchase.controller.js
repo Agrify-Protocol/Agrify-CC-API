@@ -1,0 +1,33 @@
+const Purchase = require("../models/purchase.model");
+
+const getAllPurchases = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const purchases = await Purchase.find({ userId });
+    res.status(200).json(purchases);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getPurchasesByProjectId = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { projectId } = req.params;
+
+    const purchases = await Purchase.find({ userId, projectId });
+
+    if (!purchases || purchases.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No purchases found for this project" });
+    }
+
+    res.status(200).json(purchases);
+  } catch (error) {
+    console.error("Error fetching purchases:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = { getAllPurchases, getPurchasesByProjectId };
