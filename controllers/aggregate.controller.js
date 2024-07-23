@@ -29,6 +29,21 @@ const getAggregateProjectById = async (req, res) => {
     console.log(error);
   }
 };
+const deleteUnsafe = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const project = await Aggregate.findById(id);
+    if (!project) {
+      return res
+        .status(404)
+        .json({ message: `Project with ID: ${id} not found!` });
+    }
+    await project.deleteOne();
+    return res.status(200).json({message: "Deleted"});
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 
 
@@ -429,4 +444,5 @@ module.exports = {
   preorderFarmProduce,
   getAllPreOrders,
   getOrderById,
+  deleteUnsafe,
 };
