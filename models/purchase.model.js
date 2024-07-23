@@ -33,6 +33,7 @@ const purchaseSchema = new Schema(
       ref: "User",
       required: true,
     },
+    paymentReference: { type: String },
   },
   { timestamps: true }
 );

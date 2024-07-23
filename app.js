@@ -19,6 +19,7 @@ const soilDataRoutes = require("./routes/soil_data.route");
 const farmSuggestionRoutes = require("./routes/farm_suggestion.route");
 const invoiceRoutes = require("./routes/invoice.route");
 const purchaseRoutes = require("./routes/purchase.route");
+const paymentRoutes = require("./routes/payment.route");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 const cloudinary = require("./utils/cloudinary");
@@ -57,6 +58,7 @@ app.use("/api/v1/soil-data/", soilDataRoutes);
 app.use("/api/v1/farm-suggestions", farmSuggestionRoutes);
 app.use("/api/v1/invoices", invoiceRoutes);
 app.use("/api/v1/purchases", purchaseRoutes);
+app.use("/api/v1/payments", paymentRoutes);
 
 app.post("/api/v1/upload", upload.array("images"), async (req, res) => {
   const uploadedImages = [];
