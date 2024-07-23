@@ -13,7 +13,7 @@ const { faker } = require("@faker-js/faker");
 const getAggregateProjectById = async (req, res) => {
   const { id } = req.params;
   try {
-    const farmFields = "name state country farmer availableTonnes"
+    const farmFields = "name state country farmer availableTonnes farmImages"
     const project = await Aggregate.findById(id).populate({
       path: "farms",
       select: farmFields,
@@ -241,6 +241,7 @@ const createAggregateProject = async (req, res) => {
       category,
       creditStartDate,
       creditEndDate,
+      contractType,
       // projectProvider,
       // projectWebsite,
       // blockchainAddress,
@@ -276,6 +277,7 @@ const createAggregateProject = async (req, res) => {
       category: category.toLowerCase(),
       creditStartDate: convertStringToDate(creditStartDate),
       creditEndDate: convertStringToDate(creditEndDate),
+      contractType,
       coverImage: coverImage,
       // projectProvider,
       // projectWebsite,

@@ -60,7 +60,8 @@ const addImageToGallery = async (req, res) => {
         let image = {};
         const { description } = req.body;
         if (req.files) {
-            if (req.files.image.length > 1) {
+            const imageArray = req.files.image;
+            if (imageArray.length > 1) {
                 return res.status(400).json({ message: `Upload one image at a time!` });
             }
             const file = req.files.image[0];
@@ -149,6 +150,8 @@ const createFarm = async (req, res) => {
         }
 
         if (mrvUser.farmID) {
+            const farm = await Farm.findById(mrvUser.farmID);
+            if (farm)
             return res.status(400).json({ message: `User already has a farm!` });
         }
 
