@@ -10,12 +10,10 @@ const farmSchema = new Schema(
         },
         description: {
             type: String,
-            required: true,
             default: ""
         },
         cultivationType: {
             type: String,
-            required: true,
             default: ""
         },
         country: {
