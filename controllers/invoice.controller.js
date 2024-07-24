@@ -1,6 +1,7 @@
 const Invoice = require("../models/invoice.model");
 const Project = require("../models/project.model");
 const Purchase = require("../models/purchase.model");
+const Aggregate = require("../models/aggregate.model");
 const User = require("../models/user.model");
 
 const createInvoice = async (req, res) => {
@@ -9,13 +10,19 @@ const createInvoice = async (req, res) => {
     const { projectId } = req.body;
 
     // Check if the project exists
-    const project = await Project.findById(projectId);
+    // const project = await Project.findById(projectId);
+    // if (!project) {
+    //   return res
+    //     .status(404)
+    //     .json({ message: `Project does not exist with ID ${projectId}` });
+    // }
+
+    const project = await Aggregate.findOne({ projectId });
     if (!project) {
       return res
         .status(404)
         .json({ message: `Project does not exist with ID ${projectId}` });
     }
-
     const invoiceNumber = await generateUniqueInvoiceNumber();
 
     const invoice = new Invoice({
