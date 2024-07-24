@@ -5,6 +5,7 @@ const axios = require("axios");
 const Invoice = require("../models/invoice.model");
 const Purchase = require("../models/purchase.model");
 const Project = require("../models/project.model");
+const Aggregate = require("../models/aggregate.model");
 
 const User = require("../models/user.model");
 const crypto = require("crypto");
@@ -54,7 +55,7 @@ const payWithCard = async (req, res) => {
   const { tonnes, projectId } = req.body;
 
   // Check if the project exists
-  const project = await Project.findById(projectId).populate("projectToken");
+  const project = await Aggregate.findById(projectId);
   if (!project) {
     return res
       .status(404)
