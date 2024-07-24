@@ -2,7 +2,7 @@ const express = require('express');
 const authMiddleware = require('../middleware/auth');
 const upload = require("../utils/multer");
 
-const {createFarm, deleteFarmUnsafe, createFarmUnsafe, updateFarmUnsafe, getFarmById, getFarmByFarmerId, getAllFarms, addImageToGallery, addProjectMilestones} = require('../controllers/farm.controller');
+const {createFarm, deleteFarmUnsafe, createFarmUnsafe, updateFarmUnsafe, getFarmById, getFarmByFarmerId, getAllFarms, addImageToGallery, addProjectMilestones, calculateCarbon} = require('../controllers/farm.controller');
 
 const router = express.Router();
 
@@ -31,5 +31,6 @@ upload.fields([
 addImageToGallery);
 router.get('/farm', authMiddleware, getAllFarms);
 router.get('/farm/get-by-farmer/:farmerId', getFarmByFarmerId);
+router.post('/farm/calculateCarbon', authMiddleware, calculateCarbon);
 
 module.exports = router;
