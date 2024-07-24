@@ -17,7 +17,7 @@ const createInvoice = async (req, res) => {
     //     .json({ message: `Project does not exist with ID ${projectId}` });
     // }
 
-    const project = await Aggregate.findOne({ projectId });
+    const project = await Aggregate.findById(projectId);
     if (!project) {
       return res
         .status(404)
