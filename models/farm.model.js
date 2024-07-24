@@ -65,7 +65,7 @@ const farmSchema = new Schema(
         farmer: { type: mongoose.Schema.Types.ObjectId, ref: 'MrvUser' },
         farmSuggestion: { type: mongoose.Schema.Types.ObjectId, ref: 'FarmSuggestion' },
         soilData: { type: mongoose.Schema.Types.ObjectId, ref: 'SoilData' },
-        availableTonnes: { type: Number, required: true },
+        availableTonnes: { type: Number },
 
     },
     { timestamps: true,
