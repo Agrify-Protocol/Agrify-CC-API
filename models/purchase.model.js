@@ -20,7 +20,7 @@ const purchaseSchema = new Schema(
     },
     projectId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Project",
+      ref: "Aggregate",
       required: true,
     },
     invoiceId: {
