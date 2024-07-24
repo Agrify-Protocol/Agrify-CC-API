@@ -389,6 +389,9 @@ const addFarmToAggregate = async (req, res) => {
     if (!farm) {
       throw new Error(`Farm ${farmID} not found`);
     }
+    if (!farm.availableTonnes) {
+      throw new Error(`Unable to get carbon available on farm`);
+    }
     const aggregate = await Aggregate.findById(projectID);
     if (!aggregate) {
       throw new Error(`Project ${projectID} not found`);
