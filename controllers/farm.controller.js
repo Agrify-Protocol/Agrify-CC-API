@@ -80,7 +80,7 @@ const addImageToGallery = async (req, res) => {
     }
 }
 
-const calculateCarbon = async (req, res) => {
+const calculateCarbonOnFarm = async (req, res) => {
 
     try {
         const farmerId = req.userId;
@@ -124,6 +124,51 @@ const calculateCarbon = async (req, res) => {
             return res.status(200).json(farm);
 
         }
+
+    
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Something went wrong" });
+
+    }
+}
+
+const calculateCarbon = async (req, res) => {
+
+    try {
+        // const farmerId = req.userId;
+
+        // const farmer = await MrvUser.findById(farmerId);
+        // if (!farmer) {
+        //     return res.status(404).json({ message: `Farmer does not exist with ID ${farmerId}` });
+        // }
+
+        // const farm = await Farm.findOne({ farmer: farmer._id }).select(
+        //     ["name", "state", "country", "category", "lat", "long", "area", "availableTonnes"]
+        // );
+
+        // if (!farm) {
+        //     return res.status(404).json({ message: `No farm found for farmer ID ${farmerId}` });
+        // }
+        
+        let carbon = null;
+        await axios.post(
+            "https://seal-app-bi5ac.ondigitalocean.app/calc_carbon",
+            req.body
+        )
+        .then((response) => {
+            if (response.status == '201'){
+                if (response.data){
+                    if (response.data.success == "true"){
+                        return res.status(200).json(response.data);
+                    }
+                }
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+            return res.status(500).json({ error: "Unable to get carbon emissions" });
+        });
 
     
     } catch (error) {
@@ -325,4 +370,4 @@ const getFarmByFarmerId = async (req, res) => {
 
 
 
-module.exports = { createFarm, createFarmUnsafe, deleteFarmUnsafe, updateFarmUnsafe, getFarmById, getFarmByFarmerId, getAllFarms, addImageToGallery, addProjectMilestones, calculateCarbon };
+module.exports = { createFarm, createFarmUnsafe, deleteFarmUnsafe, updateFarmUnsafe, getFarmById, getFarmByFarmerId, getAllFarms, addImageToGallery, addProjectMilestones, calculateCarbon, calculateCarbonOnFarm };
