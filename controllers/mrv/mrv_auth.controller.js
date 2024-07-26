@@ -132,5 +132,38 @@ const verifyEmailWithCode = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to verify Email" });
   }
 };
+const resendEmailVerificationCode = async (req, res) => {
+  const { email } = req.body;
+  
+  try {
+    const mrvUser = await MrvUser.findOne({ email });
+    if (!mrvUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
-module.exports = { register, login, verifyEmailWithCode, verifyEmailWithToken };
+    if (mrvUser.isEmailVerified) {
+      return res.status(400).json({ success: false, message: "Email is already verified" });
+    }
+    
+    const emailVerificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+    // const emailVerificationCodeExpiration = Date.now() + 600000;
+
+    mrvUser.emailVerificationCode = emailVerificationCode;
+    mrvUser.emailVerificationCodeExpiration = Date.now() + 600000;
+    await mrvUser.save();
+
+    res
+      .status(200)
+      .json({ success: true, message: "Verification code sent!" });
+  } catch (error) {
+    console.log("Error sending code: ", error);
+    res.status(500).json({ success: false, message: "Something went wrong. Please try again" });
+  }
+};
+
+
+
+
+module.exports = { register, login, verifyEmailWithCode, verifyEmailWithToken, resendEmailVerificationCode };

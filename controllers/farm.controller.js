@@ -8,7 +8,7 @@ const axios = require("axios");
 const getFarmById = async (req, res) => {
     const { id } = req.params;
     try {
-        const farm = await Farm.findById(id).populate({path: "farmSuggestion"}).populate({path: "soilData"});
+        const farm = await Farm.findById(id).populate({ path: "farmSuggestion" }).populate({ path: "soilData" });
         if (!farm) {
             return res.status(404).json({ message: `Farm with ID: ${id} not found!` });
         }
@@ -26,7 +26,7 @@ const deleteFarmUnsafe = async (req, res) => {
             return res.status(404).json({ message: `Farm with ID: ${id} not found!` });
         }
         await farm.deleteOne();
-        return res.status(200).json({message: "Deleted"});
+        return res.status(200).json({ message: "Deleted" });
     } catch (error) {
         console.log(error);
     }
@@ -97,35 +97,43 @@ const calculateCarbonOnFarm = async (req, res) => {
         if (!farm) {
             return res.status(404).json({ message: `No farm found for farmer ID ${farmerId}` });
         }
-        
+
         let carbon = null;
+        const { electricity, distance, waste, meal, country } = req.body;
+
         await axios.post(
             "https://seal-app-bi5ac.ondigitalocean.app/calc_carbon",
-            req.body
+            {
+                electricity: parseFloat(electricity),
+                distance: parseFloat(distance),
+                waste: parseFloat(waste),
+                meal: parseFloat(meal),
+                country: parseFloat(country)
+            }
         )
-        .then((response) => {
-            if (response.status == '201'){
-                if (response.data){
-                    console.log(response.data)
-                    if (response.data.success == "true"){
-                        carbon = parseFloat(response.data.emission);
+            .then((response) => {
+                if (response.status == '201') {
+                    if (response.data) {
+                        console.log(response.data)
+                        if (response.data.success == "true") {
+                            carbon = parseFloat(response.data.emission);
+                        }
                     }
                 }
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-            return res.status(500).json({ error: "Unable to get carbon emissions" });
-        });
+            })
+            .catch((error) => {
+                console.log(error);
+                return res.status(500).json({ error: "Unable to get carbon emissions" });
+            });
 
-        if (carbon){
+        if (carbon) {
             farm.availableTonnes = carbon;
             await farm.save();
             return res.status(200).json(farm);
 
         }
 
-    
+
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Something went wrong" });
@@ -136,41 +144,34 @@ const calculateCarbonOnFarm = async (req, res) => {
 const calculateCarbon = async (req, res) => {
 
     try {
-        // const farmerId = req.userId;
 
-        // const farmer = await MrvUser.findById(farmerId);
-        // if (!farmer) {
-        //     return res.status(404).json({ message: `Farmer does not exist with ID ${farmerId}` });
-        // }
+        const { electricity, distance, waste, meal, country } = req.body;
 
-        // const farm = await Farm.findOne({ farmer: farmer._id }).select(
-        //     ["name", "state", "country", "category", "lat", "long", "area", "availableTonnes"]
-        // );
-
-        // if (!farm) {
-        //     return res.status(404).json({ message: `No farm found for farmer ID ${farmerId}` });
-        // }
-        
-        let carbon = null;
         await axios.post(
             "https://seal-app-bi5ac.ondigitalocean.app/calc_carbon",
-            req.body
+            {
+                electricity: parseFloat(electricity),
+                distance: parseFloat(distance),
+                waste: parseFloat(waste),
+                meal: parseFloat(meal),
+                country: parseFloat(country)
+            }
         )
-        .then((response) => {
-            if (response.status == '201'){
-                if (response.data){
-                    if (response.data.success == "true"){
-                        return res.status(200).json(response.data);
+            .then((response) => {
+                if (response.status == '201') {
+                    if (response.data) {
+                        if (response.data.success == "true") {
+                            return res.status(200).json(response.data);
+                        }
                     }
                 }
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-            return res.status(500).json({ error: "Unable to get carbon emissions" });
-        });
+            })
+            .catch((error) => {
+                console.log(error);
+                return res.status(500).json({ error: "Unable to get carbon emissions" });
+            });
 
-    
+
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Something went wrong" });
@@ -251,7 +252,7 @@ const createFarm = async (req, res) => {
         if (mrvUser.farmID) {
             const farm = await Farm.findById(mrvUser.farmID);
             if (farm)
-            return res.status(400).json({ message: `User already has a farm!` });
+                return res.status(400).json({ message: `User already has a farm!` });
         }
 
         let image = {};
@@ -279,7 +280,7 @@ const createFarm = async (req, res) => {
         const cat = category.toLowerCase();
 
         const farm = await Farm.create({
-            name, description, cultivationType, country: country == "NG"? "Nigeria": country, address, city, state, farmImages, farmDocs, category: cat, farmer: mrvUser, lat: latitude, long: longitude, area
+            name, description, cultivationType, country: country == "NG" ? "Nigeria" : country, address, city, state, farmImages, farmDocs, category: cat, farmer: mrvUser, lat: latitude, long: longitude, area
         });
 
         await farm.save();
@@ -325,7 +326,7 @@ const createFarmUnsafe = async (req, res) => {
         const cat = category.toLowerCase();
 
         const farm = await Farm.create({
-            name, description, cultivationType, country: country == "NG"? "Nigeria": country, address, city, state, farmImages, farmDocs, category: cat, farmer: mrvUser, lat: latitude, long: longitude, area
+            name, description, cultivationType, country: country == "NG" ? "Nigeria" : country, address, city, state, farmImages, farmDocs, category: cat, farmer: mrvUser, lat: latitude, long: longitude, area
         });
 
         await farm.save();
