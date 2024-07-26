@@ -150,10 +150,20 @@ const resendEmailVerificationCode = async (req, res) => {
     ).toString();
     // const emailVerificationCodeExpiration = Date.now() + 600000;
 
+    
+        sendEmail(
+          mrvUser.email,
+          "Verification Code",
+          {
+            name: mrvUser.firstname,
+            emailVerificationCode,
+          },
+          "./email/template/resendEmail.handlebars"
+        );
+        
     mrvUser.emailVerificationCode = emailVerificationCode;
     mrvUser.emailVerificationCodeExpiration = Date.now() + 600000;
     await mrvUser.save();
-
     res
       .status(200)
       .json({ success: true, message: "Verification code sent!" });
