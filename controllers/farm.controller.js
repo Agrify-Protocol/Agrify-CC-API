@@ -116,7 +116,7 @@ const calculateCarbonOnFarm = async (req, res) => {
                     if (response.data) {
                         console.log(response.data)
                         if (response.data.success == "true") {
-                            carbon = parseFloat(response.data.emission);
+                            carbon = parseFloat(response.data.total_emissions);
                         }
                     }
                 }
