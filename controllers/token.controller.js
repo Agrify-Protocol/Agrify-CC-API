@@ -9,22 +9,7 @@ const authMiddleWare = require("../middleware/auth")
 
 const getMyTokens = async (req, res) => {
   try {
-    //TODO: Token refactor
-    // if (!token.associatedAccounts.includes(buyer.hederaAccountID)) {
-    // }
-
     const result = await Token.find({projectFarmers: { $in: [req.userId]}}).sort({ tokenName: 1 }).exec();
-
-    // var findUser = await MrvUser.findOne({ _id: req.userId });
-
-    // if (!findUser){
-    //   findUser = await User.findOne({ _id: req.userId });
-    // }
-    // const user = findUser;
-
-    // const result = await Token.find({ associatedAccounts: { $in: [user.hederaAccountID] } })
-
-    // const result = await tokenService.queryTokenBalance(user.hederaAccountID);
 
     res.status(200).json({ message: "My tokens", data: result });
   } catch (error) {
@@ -86,13 +71,6 @@ const purchaseToken = async (req, res) => {
   try {
     const { tokenSymbol, amount } =
       req.body;
-    // const user = await MrvUser.findOne({ _id: req.userId });
-
-    // if (!user.isFarmer){
-    //   res.status(400).json({ message: "Only farmers can send tokens" });
-    // }
-
-    // else {
 
     const token = await tokenService.getToken(tokenSymbol);
 

@@ -129,7 +129,6 @@ const aggregateSchema = new Schema(
       },
     ],
 
-    //TODO: Add farmID
   },
   { timestamps: true }
 );
