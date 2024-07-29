@@ -108,7 +108,7 @@ const calculateCarbonOnFarm = async (req, res) => {
                 distance: parseFloat(distance),
                 waste: parseFloat(waste),
                 meal: parseFloat(meal),
-                country: parseFloat(country)
+                country
             }
         )
             .then((response) => {
@@ -116,7 +116,7 @@ const calculateCarbonOnFarm = async (req, res) => {
                     if (response.data) {
                         console.log(response.data)
                         if (response.data.success == "true") {
-                            carbon = parseFloat(response.data.emission);
+                            carbon = parseFloat(response.data.total_emissions);
                         }
                     }
                 }
@@ -154,7 +154,7 @@ const calculateCarbon = async (req, res) => {
                 distance: parseFloat(distance),
                 waste: parseFloat(waste),
                 meal: parseFloat(meal),
-                country: parseFloat(country)
+                country
             }
         )
             .then((response) => {
