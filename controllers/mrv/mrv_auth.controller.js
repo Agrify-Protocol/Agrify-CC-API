@@ -12,7 +12,7 @@ const register = async (req, res) => {
     const user = await MrvUser.findOne({ email });
 
     if (user) {
-      return res.status(400).json({ eror: "User already exists!" });
+      return res.status(400).json({ error: "User already exists!" });
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
@@ -134,46 +134,55 @@ const verifyEmailWithCode = async (req, res) => {
 };
 const resendEmailVerificationCode = async (req, res) => {
   const { email } = req.body;
-  
+
   try {
     const mrvUser = await MrvUser.findOne({ email });
     if (!mrvUser) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     if (mrvUser.isEmailVerified) {
-      return res.status(400).json({ success: false, message: "Email is already verified" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email is already verified" });
     }
-    
+
     const emailVerificationCode = Math.floor(
       100000 + Math.random() * 900000
     ).toString();
     // const emailVerificationCodeExpiration = Date.now() + 600000;
 
-    
-        sendEmail(
-          mrvUser.email,
-          "Verification Code",
-          {
-            name: mrvUser.firstname,
-            emailVerificationCode,
-          },
-          "./email/template/resendEmail.handlebars"
-        );
-        
+    sendEmail(
+      mrvUser.email,
+      "Verification Code",
+      {
+        name: mrvUser.firstname,
+        emailVerificationCode,
+      },
+      "./email/template/resendEmail.handlebars"
+    );
+
     mrvUser.emailVerificationCode = emailVerificationCode;
     mrvUser.emailVerificationCodeExpiration = Date.now() + 600000;
     await mrvUser.save();
-    res
-      .status(200)
-      .json({ success: true, message: "Verification code sent!" });
+    res.status(200).json({ success: true, message: "Verification code sent!" });
   } catch (error) {
     console.log("Error sending code: ", error);
-    res.status(500).json({ success: false, message: "Something went wrong. Please try again" });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Something went wrong. Please try again",
+      });
   }
 };
 
-
-
-
-module.exports = { register, login, verifyEmailWithCode, verifyEmailWithToken, resendEmailVerificationCode };
+module.exports = {
+  register,
+  login,
+  verifyEmailWithCode,
+  verifyEmailWithToken,
+  resendEmailVerificationCode,
+};
