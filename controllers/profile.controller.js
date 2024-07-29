@@ -51,13 +51,20 @@ const overview = async (req, res) => {
 
     const userId = req.userId;
 
-    const purchases = await Purchase.find({ userId: req.userId }).populate(
-      "projectId"
-    );
+    const purchases = await Purchase.find({
+      userId: new mongoose.Types.ObjectId(userId),
+    }).populate("projectId");
 
-    const uniqueProjects = new Set(
-      purchases.map((purchase) => purchase.projectId.toString())
-    );
+    const uniqueProjects = new Set();
+
+    purchases.forEach((purchase) => {
+      console.log(purchase);
+      if (purchase.projectId !== null) {
+        uniqueProjects.add(purchase.projectId.toString());
+      }
+    });
+
+    console.log(uniqueProjects);
 
     const totalProjectsFunded = uniqueProjects.size;
     const totalTonnes = purchases.reduce(
@@ -92,14 +99,17 @@ const overview = async (req, res) => {
       invoiceAmounts.length > 0 ? invoiceAmounts[0].totalInvoiceAmount : 0;
     const totalAmount = totalInvoiceAmount;
 
-    const projectsFunded = purchases.map((purchase) => ({
-      title: purchase.projectId.title,
-      location: purchase.projectId.countryOfOrigin,
-      purchaseType: purchase.purchaseType.toUpperCase,
-      startDate: new Date(
-        purchase.projectId.creditStartDate
-      ).toLocaleDateString("en-US"),
-    }));
+    const projectsFunded = purchases
+      .filter((purchase) => purchase.projectId !== null)
+      .map((purchase) => ({
+        title: purchase.projectId.title,
+        location: purchase.projectId.countryOfOrigin,
+        purchaseType: purchase.purchaseType.toUpperCase(), // corrected from purchase.purchaseType.toUpperCase
+        startDate: new Date(
+          purchase.projectId.creditStartDate
+        ).toLocaleDateString("en-US"),
+      }));
+
     const data = {
       totalProjectsFunded,
       totalTonnes,
