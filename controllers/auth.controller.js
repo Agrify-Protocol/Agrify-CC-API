@@ -2,7 +2,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/user.model");
-const MrvUser = require("../models/mrv_user.model");
 const ResetToken = require("../models/resetToken.model");
 const sendEmail = require("../utils/sendEmail");
 const hederaService = require("../hedera/service/createAccount.js");
@@ -136,6 +135,85 @@ const verifyEmailWithToken = async (req, res) => {
   }
 };
 
+
+const verifyEmailWithCode = async (req, res) => {
+  const { emailVerificationCode } = req.body;
+  try {
+    const user = await User.findOne({ emailVerificationCode });
+    if (!user || user.emailVerificationCodeExpiration < Date.now()) {
+      return res.status(400).json({ success: false, message: "Invalid OTP" });
+    }
+
+    user.emailVerificationCode = undefined;
+    user.emailVerificationCodeExpiration = undefined;
+    user.isEmailVerified = true;
+    await user.save();
+
+    sendEmail(
+      user.email,
+      "Email Verified Successfully",
+      {
+        name: user.firstname,
+      },
+      "./email/template/emailVerified.handlebars"
+    );
+
+    res
+      .status(200)
+      .json({ success: true, message: "Email Verified Successfully!" });
+  } catch (error) {
+    console.log("Error verifying Email: ", error);
+    res.status(500).json({ success: false, message: "Failed to verify Email" });
+  }
+};
+const resendEmailVerificationCode = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    if (user.isEmailVerified) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email is already verified" });
+    }
+
+    const emailVerificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+    // const emailVerificationCodeExpiration = Date.now() + 600000;
+
+    sendEmail(
+      user.email,
+      "Verification Code",
+      {
+        name: user.firstname,
+        emailVerificationCode,
+      },
+      "./email/template/resendEmail.handlebars"
+    );
+
+    user.emailVerificationCode = emailVerificationCode;
+    user.emailVerificationCodeExpiration = Date.now() + 600000;
+    await user.save();
+    res.status(200).json({ success: true, message: "Verification code sent!" });
+  } catch (error) {
+    console.log("Error sending code: ", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Something went wrong. Please try again",
+      });
+  }
+};
+
+
 const requestResetPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -225,4 +303,6 @@ module.exports = {
   resetPassword,
   refreshtoken,
   verifyEmailWithToken,
+  verifyEmailWithCode,
+  resendEmailVerificationCode,
 };

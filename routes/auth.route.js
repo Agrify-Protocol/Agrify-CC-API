@@ -6,6 +6,8 @@ const {
   resetPassword,
   refreshtoken,
   verifyEmailWithToken,
+  verifyEmailWithCode,
+  resendEmailVerificationCode,
 } = require("../controllers/auth.controller");
 const {
   validateRequest,
@@ -21,5 +23,11 @@ router.post("/requestResetPassword", requestResetPassword);
 router.post("/resetPassword", resetPassword);
 router.post("/refreshToken", refreshtoken);
 router.post("/verify-email-token", verifyEmailWithToken);
+router.post(
+  "/verify-email",
+  validateRequest(emailVerificationSchema),
+  verifyEmailWithCode
+);
+router.post("/resend-code", resendEmailVerificationCode);
 
 module.exports = router;
