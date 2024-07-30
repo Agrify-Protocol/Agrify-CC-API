@@ -125,6 +125,15 @@ const verifyEmailWithCode = async (req, res) => {
     mrvUser.isEmailVerified = true;
     await mrvUser.save();
 
+    sendEmail(
+      mrvUser.email,
+      "Email Verified Successfully",
+      {
+        name: mrvUser.firstname,
+      },
+      "./email/template/emailVerified.handlebars"
+    );
+
     res
       .status(200)
       .json({ success: true, message: "Email Verified Successfully!" });
@@ -245,8 +254,8 @@ const resetPassword = async (req, res) => {
 module.exports = {
   register,
   login,
-  verifyEmailWithCode,
   verifyEmailWithToken,
+  verifyEmailWithCode,
   resendEmailVerificationCode,
   requestResetPassword,
   resetPassword,
