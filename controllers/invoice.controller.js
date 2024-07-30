@@ -34,6 +34,7 @@ const createInvoice = async (req, res) => {
       purchaseType: "invoice",
       status: "pending",
       tonnes: req.body.quantity,
+      amount: req.body.amount,
       projectId,
       invoiceId: invoice._id,
       userId,

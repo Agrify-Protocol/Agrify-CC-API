@@ -18,6 +18,10 @@ const purchaseSchema = new Schema(
       type: Number,
       required: true,
     },
+    amount: {
+      type: Number,
+      required: true,
+    },
     projectId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Aggregate",

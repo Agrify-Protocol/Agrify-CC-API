@@ -176,6 +176,7 @@ const handlePaystackWebhook = async (req, res) => {
         purchaseType: "card",
         status: "confirmed",
         tonnes: eventData.data.metadata.tonnes,
+        amount: eventData.data.amount,
         projectId: eventData.data.metadata.projectId,
         userId: eventData.data.metadata.userId,
         paymentReference: `paystack_${eventData.data.reference}`,
