@@ -5,6 +5,8 @@ const {
   verifyEmailWithCode,
   verifyEmailWithToken,
   resendEmailVerificationCode,
+  requestResetPassword,
+  resetPassword,
 } = require("../../controllers/mrv/mrv_auth.controller");
 const {
   validateRequest,
@@ -23,5 +25,7 @@ router.post(
 );
 router.post("/verify-email-token", verifyEmailWithToken);
 router.post("/resend-code", resendEmailVerificationCode);
+router.post("/requestResetPassword", requestResetPassword);
+router.post("/resetPassword", resetPassword);
 
 module.exports = router;
