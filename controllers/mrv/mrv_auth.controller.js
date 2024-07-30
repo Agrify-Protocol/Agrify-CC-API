@@ -42,16 +42,16 @@ const register = async (req, res) => {
     const wallet = await walletService.createWallet(mrvUser._id);
     mrvUser.wallet = wallet;
     await mrvUser.save();
-    const welcomeLink = `${process.env.CLIENT_URL}/mrvEmailVerify?token=${verifyToken}`;
     sendEmail(
       mrvUser.email,
       "Welcome to Agrify",
       {
         name: mrvUser.firstname,
-        welcomeLink,
+        emailVerificationCode,
       },
       "./email/template/welcome.handlebars"
     );
+
     const token = jwt.sign({ userId: mrvUser._id }, process.env.JWT_SECRET_KEY);
     res.status(201).json({
       message: "MRV Account Created!",

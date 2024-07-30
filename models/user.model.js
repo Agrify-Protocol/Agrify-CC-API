@@ -14,6 +14,8 @@ const userSchema = new Schema(
     hederaAccountID: { type: String },
     hederaPublicKey: { type: String },
     hederaPrivateKey: { type: String },
+    emailVerificationCode: { type: String },
+    emailVerificationCodeExpiration: { type: String },
     wallet: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Wallet",

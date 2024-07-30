@@ -21,13 +21,20 @@ const register = async (req, res) => {
     }
 
     // hash password
+    const emailVerificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+
     const hashPassword = await bcrypt.hash(password, 10);
     const user = new User({
       firstname,
       lastname,
       email,
       password: hashPassword,
-    });
+      emailVerificationCode,
+      emailVerificationCodeExpiration: Date.now() + 600000,
+    });  
+    
 
     let verifyToken = crypto.randomBytes(32).toString("hex");
     user.verificationToken = verifyToken;
@@ -59,7 +66,7 @@ const register = async (req, res) => {
       "Welcome to Agrify",
       {
         name: user.firstname,
-        welcomeLink,
+        emailVerificationCode,
       },
       "./email/template/welcome.handlebars"
     );
