@@ -244,6 +244,15 @@ const resetPassword = async (req, res) => {
     );
     const user = await MrvUser.findById({ _id: userId });
     await passwordResetToken.deleteOne();
+    sendEmail(
+      user.email,
+      "Password Updated",
+      {
+        name: user.firstname,
+      },
+      "./email/template/resetPassword.handlebars"
+    );
+
     res.status(201).json({ user: user, message: "User password updated!" });
   } catch (error) {
     console.log(error);
