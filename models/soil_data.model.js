@@ -11,7 +11,7 @@ const soilDataSchema = new Schema(
       ref: "Farm",
       required: true,
     },
-    FarmerName: { type: String, required: true },
+    FarmerName: { type: String },
     ClayContent: { type: Number, required: true },
     CEC: { type: String, required: true },
     SoilDepth: { type: String, required: true },
@@ -23,7 +23,8 @@ const soilDataSchema = new Schema(
     BulkDensity: { type: String, required: true },
     Area: { type: Number, required: true },
   },
-  { timestamps: true,
+  {
+    timestamps: true,
     toJSON: {
       transform: function (doc, ret) {
         delete ret.__v;
@@ -32,8 +33,7 @@ const soilDataSchema = new Schema(
         delete ret.updatedAt;
       },
     },
-
-   }
+  }
 );
 
 module.exports = mongoose.model("SoilData", soilDataSchema);
