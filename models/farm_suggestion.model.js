@@ -22,7 +22,7 @@ const farmSuggestionSchema = new Schema(
       ref: "Farm",
       required: true,
     },
-    FarmerName: { type: String, required: true },
+    FarmerName: { type: String },
     FarmScore: { type: Number, required: true },
     RecommendationsIntro: { type: String, required: true },
     Month1: { type: monthSchema, required: true },
