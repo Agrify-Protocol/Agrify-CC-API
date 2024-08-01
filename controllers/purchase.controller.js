@@ -40,7 +40,7 @@ const getPurchasesByPaymentRef = async (req, res) => {
     if (!purchases || purchases.length === 0) {
       return res
         .status(404)
-        .json({ message: "No purchases found for this project" });
+        .json({ message: `No purchases found with ref: ${paymentReference}` });
     }
 
     res.status(200).json(purchases);
