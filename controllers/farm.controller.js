@@ -50,6 +50,30 @@ const updateFarmUnsafe = async (req, res) => {
     }
 }
 
+const updatePreferredLanguage = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const farm = await Farm.findById(id);
+        if (!farm) {
+            return res.status(404).json({ message: `Farm with ID: ${id} not found!` });
+        }
+        const { language } = req.body;
+
+        const preferredLanguage = language.toLowerCase().trim();
+
+        if (!['english', 'swahili', 'pidgin'].includes(preferredLanguage)){
+            return res.status(400).json({ message: "Invalid request" });
+        }
+
+        farm.preferredLanguage = preferredLanguage;
+        await farm.save();
+        return res.status(200).json({ success: true, preferredLanguage: preferredLanguage });
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 const addImageToGallery = async (req, res) => {
     const { farmID } = req.params;
 
@@ -271,7 +295,7 @@ const createFarm = async (req, res) => {
         }
 
         const {
-            name, description, cultivationType, country, address, city, state, latitude, longitude, area, category
+            name, description, cultivationType, country, address, city, state, preferredLanguage, latitude, longitude, area, category
         } = req.body;
 
         // //TODO: Geolocation API
@@ -280,7 +304,7 @@ const createFarm = async (req, res) => {
         const cat = category.toLowerCase();
 
         const farm = await Farm.create({
-            name, description, cultivationType, country: country == "NG" ? "Nigeria" : country, address, city, state, farmImages, farmDocs, category: cat, farmer: mrvUser, lat: latitude, long: longitude, area
+            name, description, cultivationType, country: country == "NG" ? "Nigeria" : country, address, city, state, preferredLanguage, farmImages, farmDocs, category: cat, farmer: mrvUser, lat: latitude, long: longitude, area
         });
 
         await farm.save();
@@ -317,7 +341,7 @@ const createFarmUnsafe = async (req, res) => {
         }
 
         const {
-            name, description, cultivationType, country, address, city, state, latitude, longitude, area, category
+            name, description, cultivationType, country, address, city, state, preferredLanguage, latitude, longitude, area, category
         } = req.body;
 
         // //TODO: Geolocation API
@@ -326,7 +350,7 @@ const createFarmUnsafe = async (req, res) => {
         const cat = category.toLowerCase();
 
         const farm = await Farm.create({
-            name, description, cultivationType, country: country == "NG" ? "Nigeria" : country, address, city, state, farmImages, farmDocs, category: cat, farmer: mrvUser, lat: latitude, long: longitude, area
+            name, description, cultivationType, country: country == "NG" ? "Nigeria" : country, address, city, state, preferredLanguage, farmImages, farmDocs, category: cat, farmer: mrvUser, lat: latitude, long: longitude, area
         });
 
         await farm.save();
@@ -371,4 +395,16 @@ const getFarmByFarmerId = async (req, res) => {
 
 
 
-module.exports = { createFarm, createFarmUnsafe, deleteFarmUnsafe, updateFarmUnsafe, getFarmById, getFarmByFarmerId, getAllFarms, addImageToGallery, addProjectMilestones, calculateCarbon, calculateCarbonOnFarm };
+module.exports = { 
+    createFarm, 
+    createFarmUnsafe,
+    deleteFarmUnsafe, 
+    updateFarmUnsafe, 
+    getFarmById, 
+    getFarmByFarmerId, 
+    getAllFarms, 
+    addImageToGallery, 
+    addProjectMilestones, 
+    calculateCarbon, 
+    calculateCarbonOnFarm,
+    updatePreferredLanguage };
