@@ -21,7 +21,7 @@ const soilDataSchema = new Schema(
     SoilPH: { type: String, required: true },
     NitrogenContent: { type: String, required: true },
     BulkDensity: { type: String, required: true },
-    Area: { type: Number, required: true },
+    Area: { type: Number },
   },
   {
     timestamps: true,
