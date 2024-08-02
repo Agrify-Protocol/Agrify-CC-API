@@ -90,7 +90,7 @@ const calculateCarbonOnFarm = async (req, res) => {
             return res.status(404).json({ message: `Farmer does not exist with ID ${farmerId}` });
         }
 
-        const farm = await Farm.findOne({ farmer: farmer._id }).select(
+        const farm = await Farm.findOne({ farmer: farmer._id }, null, { sort: {createdAt: -1}}).select(
             ["name", "state", "country", "category", "lat", "long", "area", "availableTonnes"]
         );
 
