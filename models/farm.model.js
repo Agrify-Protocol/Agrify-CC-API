@@ -32,6 +32,11 @@ const farmSchema = new Schema(
             type: String,
             required: true
         },
+        preferredLanguage: {
+            type: String,
+            enum: ['english', 'swahili', 'pidgin'],
+            default: "english"
+        },
         farmDocs: [{ type: String, required: true }],
         farmImages: [
             {
