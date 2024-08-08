@@ -55,7 +55,7 @@ const investInNature = async (req, res) => {
         const investor = await Investor.create(req.body);
 
         await investor.save();
-        res.status(201).json(investor);
+        res.status(201).json({status: "Successful", message: "Submitted successfully", investor});
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: error.message });
