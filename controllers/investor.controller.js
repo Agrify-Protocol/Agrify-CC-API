@@ -52,7 +52,28 @@ const getAllInvestors = async (req, res) => {
 const investInNature = async (req, res) => {
     try {
 
-        const investor = await Investor.create(req.body);
+        const {
+            email,
+            firstName,
+            lastName,
+            companyName,
+            role,
+            interest,
+        } = req.body;
+
+        const existingInvestor = Investor.findOne({email});
+        if (existingInvestor){
+            return res.status(400).json({ message: `This email has already been registered!` });
+        }
+
+        const investor = await Investor.create({
+            email,
+            firstName,
+            lastName,
+            companyName,
+            role,
+            interest,
+        });
 
         await investor.save();
         res.status(201).json({status: "Successful", message: "Submitted successfully", investor});
