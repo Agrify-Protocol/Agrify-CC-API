@@ -21,6 +21,25 @@ const getMyWallet = async (userId) => {
   }
 };
 
+const getWalletById = async (userId) => {
+  try {
+    const wallet = await Wallet.findOne({ userId: userId }).populate({
+      path: "tokens",
+      populate: {
+        path: "token",
+        select: ["tokenSymbol", "tokenName"],
+      },
+    });
+
+    if (!wallet) {
+      throw new Error(`No wallet found for user ${userId}`);
+    }
+    return wallet;
+  } catch (error) {
+    console.error({ error: error.message });
+  }
+};
+
 const createWallet = async (userId) => {
   try {
     const walletExists = await Wallet.findOne({ userId });
@@ -172,6 +191,7 @@ const debitWallet = async (
 
 module.exports = {
   getMyWallet,
+  getWalletById,
   deleteWallet,
   createWallet,
   creditWallet,

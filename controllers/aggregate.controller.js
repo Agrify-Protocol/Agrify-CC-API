@@ -19,6 +19,10 @@ const getAggregateProjectById = async (req, res) => {
       select: farmFields,
     }).populate({ path: "projectToken" })
       .sort({ availableTonnes: -1 });
+    const projectToken = await tokenService.getTokenByID(project.projectToken.tokenId);
+    project.projectToken = projectToken;
+    await project.save();
+
     if (!project) {
       return res
         .status(404)
@@ -39,7 +43,7 @@ const deleteUnsafe = async (req, res) => {
         .json({ message: `Project with ID: ${id} not found!` });
     }
     await project.deleteOne();
-    return res.status(200).json({message: "Deleted"});
+    return res.status(200).json({ message: "Deleted" });
   } catch (error) {
     console.log(error);
   }
@@ -50,6 +54,7 @@ const deleteUnsafe = async (req, res) => {
 const getProjectsByCategory = async (req, res) => {
   const { category } = req.params;
 
+  //TODO: Sync availableTonnes from Hedera
   try {
     const filter = { category: { $in: [category] } };
     const projects = await Aggregate.find(filter).populate({ path: "projectToken" });
@@ -94,6 +99,7 @@ const getProjectsByCategory = async (req, res) => {
 
 const getAllProjectCategories = async (req, res) => {
 
+  //TODO: Sync availableTonnes from Hedera
   try {
     const projects = await Aggregate.find().populate({ path: "projectToken" });
 
@@ -167,7 +173,12 @@ const getAllAggregateProjects = async (req, res) => {
       .populate({
         path: "farms",
         select: "name state country category availableTonnes ",
-      });
+      })
+      .populate({
+        path: "projectToken",
+        select: "projectFarmers ",
+      })
+      ;
     const total = await Aggregate.countDocuments();
     const totalPages = Math.ceil(total / limit);
 
@@ -232,8 +243,6 @@ const createAggregateProject = async (req, res) => {
       price,
       latitude,
       longitude,
-      // availableTonnes,
-      // totalTonnes,
       tags,
       minimumPurchaseTonnes,
       state,
@@ -242,13 +251,9 @@ const createAggregateProject = async (req, res) => {
       creditStartDate,
       creditEndDate,
       contractType,
-      // projectProvider,
-      // projectWebsite,
-      // blockchainAddress,
-      // typeOfProject,
-      // certification,
-      // certificationURL,
-      // certificateCode,
+
+      tokenId,
+      tokenSymbol,
     } = req.body;
 
     //Create token for project
@@ -257,7 +262,9 @@ const createAggregateProject = async (req, res) => {
       title,
       req.userId,
       minimumPurchaseTonnes,
-      price
+      price,
+      tokenId,
+      tokenSymbol,
     );
     if (!token) throw new Error("Error creating project token");
 
@@ -279,13 +286,6 @@ const createAggregateProject = async (req, res) => {
       creditEndDate: convertStringToDate(creditEndDate),
       contractType,
       coverImage: coverImage,
-      // projectProvider,
-      // projectWebsite,
-      // blockchainAddress,
-      // typeOfProject,
-      // certification,
-      // certificationURL,
-      // certificateCode,
       supportingDocument: supportingDocumentLink,
       projectToken: token,
     });
@@ -312,7 +312,7 @@ const preorderFarmProduce = async (req, res) => {
       name,
       phoneNumber,
       address
-     } = req.body;
+    } = req.body;
 
     const order = await BulkOrder.create({
       amount,
@@ -399,6 +399,18 @@ const addFarmToAggregate = async (req, res) => {
 
     const farmList = aggregate.farms;
 
+    //Check for "ghost" farms
+    farmList.forEach(async (farmRef) => {
+      const farmID = farmRef.toString();
+      const farm = await Farm.findById(farmID);
+
+      const a = "";
+      if (!farm) {
+        farmList.splice(farmList.indexOf(farmRef), 1);
+      }
+
+    });
+
     //Check if farm already belongs to aggregate
     const farmAlreadyExists = farmList.findIndex(t => t.toHexString() == farmID)
     if (farmAlreadyExists != -1) {
@@ -418,18 +430,19 @@ const addFarmToAggregate = async (req, res) => {
     await aggregate.farms.push(farmID);
     await aggregate.save();
 
+    //TODO: Remove. Minting will be done by Guardian API
     //Mint tokens
-    const amountOfTokens = farm.availableTonnes;
-    const projectToken = await Token.findById(aggregate.projectToken.toString());
-    if (!projectToken) {
-      throw new Error(`No token found for project ${projectID}`);
-    }
-    const token = await tokenService.mintToken(projectToken.tokenSymbol, amountOfTokens);
-    if (!token) throw new Error("Error minting project token");
+    // const amountOfTokens = farm.availableTonnes;
+    // const projectToken = await Token.findById(aggregate.projectToken.toString());
+    // if (!projectToken) {
+    //   throw new Error(`No token found for project ${projectID}`);
+    // }
+    // const token = await tokenService.mintToken(projectToken.tokenSymbol, amountOfTokens);
+    // if (!token) throw new Error("Error minting project token");
 
     //Add farmer to tokenList
-    await token.projectFarmers.push(farm.farmer);
-    await token.save();
+    await aggregate.projectFarmers.push(farm.farmer);
+    await aggregate.save();
 
     res.status(200).json(aggregate);
   } catch (error) {

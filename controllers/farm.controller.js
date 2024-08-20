@@ -235,6 +235,8 @@ const getAllFarms = async (req, res) => {
             sortCriteria = { availableTonnes: 1 };
         } else if (sortBy === "tonnesLeftHighToLow") {
             sortCriteria = { availableTonnes: -1 };
+        } else if (sortBy === "category") {
+            sortCriteria = { category: 1 };
         } else {
             sortCriteria = {};
         }
