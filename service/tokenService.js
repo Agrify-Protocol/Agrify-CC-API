@@ -14,7 +14,6 @@ const createToken = async (
   minimumPurchaseTonnes,
   price,
   tokenId,
-  tokenName,
   tokenSymbol,
 ) => {
   try {
