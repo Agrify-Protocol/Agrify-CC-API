@@ -74,7 +74,7 @@ const purchaseToken = async (req, res) => {
 
       const hederaToken = await hederaService.getHederaToken(tokenID);
 
-      const amountInTonnes = amount / Math.pow(10, hederaToken.decimals);
+      // const amountInTonnes = amount / Math.pow(10, hederaToken.decimals);
 
     // const debitAmount = Number(amount * token.price);
 
@@ -95,7 +95,7 @@ const purchaseToken = async (req, res) => {
     //     error: `Amount cannot be greater than ${token.availableTonnes}`,
     //   });
     // }
-      const tokenReceipt = await tokenService.purchaseToken(tokenID, amountInTonnes, req.userId);
+      const tokenReceipt = await tokenService.purchaseToken(tokenID, amount, req.userId);
       if (!tokenReceipt) throw new Error("Error transferring token");
       res.status(200).json({message: "Transaction successful", data: tokenReceipt });
   } catch (error) {

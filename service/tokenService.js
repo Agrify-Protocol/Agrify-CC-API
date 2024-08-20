@@ -243,11 +243,11 @@ const purchaseToken = async (
       const farmList = project.farms;
 
           //Check for "ghost" farms
-    farmList.forEach(async (farmRef) => {
-      const farmID = farmRef.toString();
-      const farm = await Farm.findOne({ _id: farmID });
+    // farmList.forEach(async (farmRef) => {
+    //   const farmID = farmRef.toString();
+    //   const farm = await Farm.findOne({ _id: farmID });
       
-    });
+    // });
 
 
       // //FOR EACH FARM IN FARMS
@@ -294,7 +294,7 @@ const purchaseToken = async (
       token.availableTonnes -= amountInTonnes;
 
       //TODO: Update project tonnes
-      // await token.save();
+      await token.save();
       return receipt;
     }
   } catch (error) {
