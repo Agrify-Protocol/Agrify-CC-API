@@ -237,8 +237,6 @@ const createAggregateProject = async (req, res) => {
       price,
       latitude,
       longitude,
-      // availableTonnes,
-      // totalTonnes,
       tags,
       minimumPurchaseTonnes,
       state,
@@ -247,13 +245,9 @@ const createAggregateProject = async (req, res) => {
       creditStartDate,
       creditEndDate,
       contractType,
-      // projectProvider,
-      // projectWebsite,
-      // blockchainAddress,
-      // typeOfProject,
-      // certification,
-      // certificationURL,
-      // certificateCode,
+
+      tokenId,
+      tokenSymbol,
     } = req.body;
 
     //Create token for project
@@ -264,7 +258,6 @@ const createAggregateProject = async (req, res) => {
       minimumPurchaseTonnes,
       price,
       tokenId,
-      tokenName,
       tokenSymbol,
     );
     if (!token) throw new Error("Error creating project token");
