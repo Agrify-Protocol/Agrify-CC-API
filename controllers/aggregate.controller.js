@@ -18,7 +18,10 @@ const getAggregateProjectById = async (req, res) => {
       path: "farms",
       select: farmFields,
     }).populate({ path: "projectToken" })
-      .sort({ availableTonnes: -1 });
+    .sort({ availableTonnes: -1 });
+    const tokenBalance = tokenService.queryTokenBalance(project.projectToken.tokenId);
+    project.projectToken.availableTonnes = tokenBalance;
+
     if (!project) {
       return res
         .status(404)
@@ -50,6 +53,7 @@ const deleteUnsafe = async (req, res) => {
 const getProjectsByCategory = async (req, res) => {
   const { category } = req.params;
 
+  //TODO: Sync availableTonnes from Hedera
   try {
     const filter = { category: { $in: [category] } };
     const projects = await Aggregate.find(filter).populate({ path: "projectToken" });
@@ -94,6 +98,7 @@ const getProjectsByCategory = async (req, res) => {
 
 const getAllProjectCategories = async (req, res) => {
 
+  //TODO: Sync availableTonnes from Hedera
   try {
     const projects = await Aggregate.find().populate({ path: "projectToken" });
 
@@ -257,7 +262,10 @@ const createAggregateProject = async (req, res) => {
       title,
       req.userId,
       minimumPurchaseTonnes,
-      price
+      price,
+      tokenId,
+      tokenName,
+      tokenSymbol,
     );
     if (!token) throw new Error("Error creating project token");
 
@@ -279,13 +287,6 @@ const createAggregateProject = async (req, res) => {
       creditEndDate: convertStringToDate(creditEndDate),
       contractType,
       coverImage: coverImage,
-      // projectProvider,
-      // projectWebsite,
-      // blockchainAddress,
-      // typeOfProject,
-      // certification,
-      // certificationURL,
-      // certificateCode,
       supportingDocument: supportingDocumentLink,
       projectToken: token,
     });
@@ -418,18 +419,19 @@ const addFarmToAggregate = async (req, res) => {
     await aggregate.farms.push(farmID);
     await aggregate.save();
 
+    //TODO: Remove. Minting will be done by Guardian API
     //Mint tokens
-    const amountOfTokens = farm.availableTonnes;
-    const projectToken = await Token.findById(aggregate.projectToken.toString());
-    if (!projectToken) {
-      throw new Error(`No token found for project ${projectID}`);
-    }
-    const token = await tokenService.mintToken(projectToken.tokenSymbol, amountOfTokens);
-    if (!token) throw new Error("Error minting project token");
+    // const amountOfTokens = farm.availableTonnes;
+    // const projectToken = await Token.findById(aggregate.projectToken.toString());
+    // if (!projectToken) {
+    //   throw new Error(`No token found for project ${projectID}`);
+    // }
+    // const token = await tokenService.mintToken(projectToken.tokenSymbol, amountOfTokens);
+    // if (!token) throw new Error("Error minting project token");
 
     //Add farmer to tokenList
-    await token.projectFarmers.push(farm.farmer);
-    await token.save();
+    // await aggregate.projectFarmers.push(farm.farmer);
+    // await aggregate.save();
 
     res.status(200).json(aggregate);
   } catch (error) {

@@ -69,31 +69,31 @@ const createToken = async (req, res) => {
 
 const purchaseToken = async (req, res) => {
   try {
-    const { tokenSymbol, amount } =
+    const { tokenID, amount } =
       req.body;
 
-    const token = await tokenService.getToken(tokenSymbol);
+    // const token = await tokenService.getToken(tokenSymbol);
 
-    const debitAmount = Number(amount * token.price);
+    // const debitAmount = Number(amount * token.price);
 
-    const wallet = await walletService.getMyWallet(req.userId);
-    if (Number(wallet.balance) < debitAmount) {
-      return res.status(400).json({
-        error: `Insufficient balance`
-      });
-    }
+    // const wallet = await walletService.getMyWallet(req.userId);
+    // if (Number(wallet.balance) < debitAmount) {
+    //   return res.status(400).json({
+    //     error: `Insufficient balance`
+    //   });
+    // }
 
-    if (amount < token.minimumPurchaseTonnes) {
-      return res.status(400).json({
-        error: `Amount cannot be less than ${token.minimumPurchaseTonnes}`,
-      });
-    }
-    if (amount > token.availableTonnes) {
-      return res.status(400).json({
-        error: `Amount cannot be greater than ${token.availableTonnes}`,
-      });
-    }
-      const tokenReceipt = await tokenService.purchaseToken(tokenSymbol, amount, req.userId);
+    // if (amount < token.minimumPurchaseTonnes) {
+    //   return res.status(400).json({
+    //     error: `Amount cannot be less than ${token.minimumPurchaseTonnes}`,
+    //   });
+    // }
+    // if (amount > token.availableTonnes) {
+    //   return res.status(400).json({
+    //     error: `Amount cannot be greater than ${token.availableTonnes}`,
+    //   });
+    // }
+      const tokenReceipt = await tokenService.purchaseToken(tokenID, amount, req.userId);
       if (!tokenReceipt) throw new Error("Error transferring token");
       res.status(200).json({message: "Transaction successful", data: tokenReceipt });
   } catch (error) {
@@ -111,8 +111,26 @@ const burnToken = async (req, res) => {
       return res.status(404).json({ message: "Token " + tokenSymbol + " not found!" });
     }
     else {
-      const token = await tokenService.burnToken(tokenSymbol);
+      const token = await tokenService.burnToken(token.tokenId);
       res.status(200).json({ message: "Token burnt successfully", data: token });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const mintToken = async (req, res) => {
+  try {
+    const { tokenSymbol } =
+      req.params;
+    const token = await Token.findOne({ tokenSymbol: tokenSymbol });
+
+    if (!token) {
+      return res.status(404).json({ message: "Token " + tokenSymbol + " not found!" });
+    }
+    else {
+      const token = await tokenService.mintToken(token.tokenId);
+      res.status(200).json({ message: "Token minted successfully", data: token });
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -123,6 +141,7 @@ module.exports = {
   createToken,
   purchaseToken,
   burnToken,
+  mintToken,
   getMyTokens,
   getToken,
   getTokenByID,

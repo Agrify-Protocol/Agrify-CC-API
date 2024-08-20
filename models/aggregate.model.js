@@ -128,6 +128,8 @@ const aggregateSchema = new Schema(
         ref: "Farm",
       },
     ],
+    projectFarmers: [{ type: String }],
+
 
   },
   { timestamps: true }

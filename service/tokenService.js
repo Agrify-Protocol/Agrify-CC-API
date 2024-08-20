@@ -11,20 +11,21 @@ const createToken = async (
   projectId,
   tokenName,
   tokenOwner,
-  // totalTonnes,
-  // availableTonnes,
   minimumPurchaseTonnes,
   price,
+  tokenId,
+  tokenName,
+  tokenSymbol,
 ) => {
   try {
-    const tokenSymbol = `${projectId}-AGT`;
+    // const tokenSymbol = `${projectId}-AGT`;
     const totalTonnes = 0;
-    const tokenId = await hederaService.createHederaToken(
-      tokenName,
-      tokenSymbol,
-      totalTonnes
+    // const tokenId = await hederaService.createHederaToken(
+    //   tokenName,
+    //   tokenSymbol,
+    //   totalTonnes
 
-    );
+    // );
     if (!tokenId) throw new Error("Error creating token");
     const token = await Token.create({
       tokenId,
@@ -67,24 +68,33 @@ const getTokenByID = async (tokenId) => {
   }
 };
 
-const queryTokenBalance = async (accountID) => {
+const queryTokenBalance = async (tokenId, accountID) => {
   try {
-    const tokens = await hederaService.queryTokenBalance(accountID);
-    if (!tokens) throw new Error("Unable to get token");
+    let tokens;
+    if (accountID) {
+      tokens = await hederaService.queryTokenBalance(accountID);
+    }
+    else {
+      tokens = await hederaService.queryAdminTokenBalance();
+    }
+    let token;
+    if (!tokens) token = 0;
+    else {
+      const tokenCents = tokens.tokens.get(tokenId);
+      const tokenDecimal = tokens.tokenDecimals.get(tokenId);
+      if (tokenCents == undefined || tokenDecimal == undefined) {
+        throw new Error("Unable to get token");
+      }
+      else {
+        token = tokenCents / Math.pow(10, tokenDecimal);
+      }
+    }
 
-    const tokenList = tokens.tokens;
-    const mp = new Map(tokenList);
-    // for (const token in object) {
-    //   if (Object.hasOwnProperty.call(object, token)) {
-    //     const element = object[token];
-        
-    //   }
-    // }
-    await mp.forEach((balance, tokenID) => {
-      const token = getTokenByID(tokenID);
-      token.balance = balance;
-      token.save();
-    });
+    // await mp.forEach((balance, tokenID) => {
+    //   const token = getTokenByID(tokenID);
+    //   token.balance = balance;
+    //   token.save();
+    // });
     return token;
 
     // return receipt;
@@ -93,17 +103,17 @@ const queryTokenBalance = async (accountID) => {
   }
 };
 
-const burnToken = async (tokenSymbol) => {
+const burnToken = async (tokenID) => {
   try {
-    const token = await getToken(tokenSymbol);
-    const tokenID = token.tokenId;
+    const token = await getTokenByID(tokenID);
+    // const tokenID = token.tokenId;
     const amountInCirculation = token.totalTonnes;
 
-    const receipt = await hederaService.burnHederaToken(
-      tokenID,
-      amountInCirculation
-    );
-    if (!receipt) throw new Error("Error burning token");
+    // const receipt = await hederaService.burnHederaToken(
+    //   tokenID,
+    //   amountInCirculation
+    // );
+    // if (!receipt) throw new Error("Error burning token");
     token.totalTonnes -= amountInCirculation;
     token.availableTonnes -= amountInCirculation;
     // token.tokenId = tokenID;
@@ -116,17 +126,17 @@ const burnToken = async (tokenSymbol) => {
   }
 };
 
-const mintToken = async (tokenSymbol, amount) => {
+const mintToken = async (tokenID, amount) => {
   try {
-    const token = await getToken(tokenSymbol);
-    const tokenID = token.tokenId;
+    const token = await getTokenByID(tokenID);
+    // const tokenID = token.tokenId;
     // const amountInCirculation = token.totalTonnes;
 
-    const receipt = await hederaService.mintHederaToken(
-      tokenID,
-      amount
-    );
-    if (!receipt) throw new Error("Error minting token");
+    // const receipt = await hederaService.mintHederaToken(
+    //   tokenID,
+    //   amount
+    // );
+    // if (!receipt) throw new Error("Error minting token");
     token.totalTonnes += amount;
     token.availableTonnes += amount;
     // token.tokenId = tokenID;
@@ -139,21 +149,34 @@ const mintToken = async (tokenSymbol, amount) => {
   }
 };
 
-const associateToken = async (tokenSymbol, accountID) => {
+const associateToken = async (tokenID, accountID) => {
   try {
-    const token = await getToken(tokenSymbol);
-    const tokenID = token.tokenId;
+    const token = await getTokenByID(tokenID);
+    // const tokenID = token.tokenId;
 
-    const accountID = req.userId;
+    // const accountID = req.userId;
 
-    const receipt = await hederaService.associateHederaToken(
-      tokenID,
-      accountID
-    );
-    if (!receipt) throw new Error("Error associating token");
+    const buyer = await User.findById(accountID);
 
-    token.associatedAccounts.push(accountID);
-    return token;
+    if (!buyer){ 
+      throw new Error("User not found");
+    }
+    if (buyer.associatedTokens.includes(tokenID)) {
+      throw new Error("Token already associated to account");
+    }
+  
+    await buyer.associatedTokens.push(tokenID);
+    await buyer.save();
+
+
+    // const receipt = await hederaService.associateHederaToken(
+    //   tokenID,
+    //   accountID
+    // );
+    // if (!receipt) throw new Error("Error associating token");
+
+    // token.associatedAccounts.push(accountID);
+    return buyer;
   } catch (error) {
     console.error({ error: error.message });
     return error;
@@ -161,14 +184,21 @@ const associateToken = async (tokenSymbol, accountID) => {
 };
 
 const purchaseToken = async (
-  tokenSymbol,
+  tokenID,
   amountInTonnes, //senderID,
   buyerID
+
 ) => {
   try {
-    const token = await getToken(tokenSymbol);
+    const token = await getTokenByID(tokenID);
 
-    const tokenID = token.tokenId;
+    const tokenBalance = queryTokenBalance(tokenID);
+
+    token.availableTonnes = tokenBalance;
+
+    // const token = await hederaService.getHederaToken(tokenID);
+
+    // const tokenID = token.tokenId;
 
     // const senderID = mrvUser.hederaAccountID;
 
@@ -177,7 +207,7 @@ const purchaseToken = async (
       const buyer = await User.findById(buyerID);
 
       //Associate token to user
-      if (!token.associatedAccounts.includes(buyer.hederaAccountID)) {
+      if (!buyer.associatedTokens.includes(tokenID)) {
         const associationReceipt = await hederaService.associateHederaToken(
           tokenID,
           buyer
@@ -185,8 +215,8 @@ const purchaseToken = async (
         if (!associationReceipt) {
           throw new Error("Unable to associate token to recipient");
         } else {
-          await token.associatedAccounts.push(buyer.hederaAccountID);
-          await token.save();
+          await buyer.associatedTokens.push(tokenID);
+          await buyer.save();
         }
       }
 
@@ -195,11 +225,11 @@ const purchaseToken = async (
 
       const amountInFiat = Number(amountInTonnes * token.price);
 
-      const debitTx = await walletService.debitWallet(
-        amountInFiat,
-        buyerWallet.id,
-        `Bought ${amountInTonnes} tonnes of ${token.tokenSymbol}`
-      );
+      // const debitTx = await walletService.debitWallet(
+      //   amountInFiat,
+      //   buyerWallet.id,
+      //   `Bought ${amountInTonnes} tonnes of ${token.tokenSymbol}`
+      // );
 
       //Credit farmer wallet
       const project = await Aggregate.findOne({ projectToken: token });
@@ -218,17 +248,17 @@ const purchaseToken = async (
         farm.availableTonnes -= debitedAmountInTonnes;
         await farm.save();
 
-        //FARMER WALLET CREDIT = 70% * (FP * amountInFiat)
-        const creditAmount = (0.7 * FP * amountInFiat).toFixed(2);
-        const farmerWallet = await walletService.getMyWallet(farm.farmer);
+      //FARMER WALLET CREDIT = 70% * (FP * amountInFiat)
+      const creditAmount = (0.7 * FP * amountInFiat).toFixed(2);
+      const farmerWallet = await walletService.getMyWallet(farm.farmer);
 
-        const creditTx = await walletService.creditWallet(
-          creditAmount,
-          farmerWallet.id,
-          `Sold ${debitedAmountInTonnes} tonnes of ${token.tokenSymbol}`
-        );
+      const creditTx = await walletService.creditWallet(
+        creditAmount,
+        farmerWallet.id,
+        `Sold ${debitedAmountInTonnes} tonnes of ${token.tokenSymbol}`
+      );
 
-        //Add tokens to farmer wallet
+      //Add tokens to farmer wallet
         await walletService.addTokenToFarmerWallet(farmerWallet.id, token.id, debitedAmountInTonnes, FP);
 
       });
@@ -250,8 +280,8 @@ const purchaseToken = async (
       token.availableTonnes -= amountInTonnes;
 
       //TODO: Update project tonnes
-      await token.save();
-      return debitTx;
+      // await token.save();
+      return receipt;
     }
   } catch (error) {
     console.error({ error: error.message });
