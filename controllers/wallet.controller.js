@@ -50,6 +50,23 @@ const getMyWallet = async (req, res) => {
   }
 };
 
+const getWalletById = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+
+    const wallet = await walletService.getWalletById(userId);
+
+    if (!wallet) {
+      return res.status(404).json({ message: `No wallet found for user ${req.userId}` });
+    }
+
+    res.status(200).json({ wallet });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const fundWallet = async (req, res) => {
   const { amount } =
     req.body;
@@ -96,6 +113,7 @@ module.exports = {
   createWallet,
   deleteWallet,
   getMyWallet,
+  getWalletById,
   fundWallet,
   withdraw,
 };

@@ -72,7 +72,9 @@ const purchaseToken = async (req, res) => {
     const { tokenID, amount } =
       req.body;
 
-    // const token = await tokenService.getToken(tokenSymbol);
+      const hederaToken = await hederaService.getHederaToken(tokenID);
+
+      const amountInTonnes = amount / Math.pow(10, hederaToken.decimals);
 
     // const debitAmount = Number(amount * token.price);
 
@@ -93,7 +95,7 @@ const purchaseToken = async (req, res) => {
     //     error: `Amount cannot be greater than ${token.availableTonnes}`,
     //   });
     // }
-      const tokenReceipt = await tokenService.purchaseToken(tokenID, amount, req.userId);
+      const tokenReceipt = await tokenService.purchaseToken(tokenID, amountInTonnes, req.userId);
       if (!tokenReceipt) throw new Error("Error transferring token");
       res.status(200).json({message: "Transaction successful", data: tokenReceipt });
   } catch (error) {
@@ -121,15 +123,15 @@ const burnToken = async (req, res) => {
 
 const mintToken = async (req, res) => {
   try {
-    const { tokenSymbol } =
-      req.params;
-    const token = await Token.findOne({ tokenSymbol: tokenSymbol });
+    const { tokenID, amount } =
+      req.body;
+    const token = await tokenService.getTokenByID(tokenID);
 
     if (!token) {
-      return res.status(404).json({ message: "Token " + tokenSymbol + " not found!" });
+      return res.status(404).json({ message: "Token " + tokenID + " not found!" });
     }
     else {
-      const token = await tokenService.mintToken(token.tokenId);
+      const token = await tokenService.mintToken(tokenID, amount);
       res.status(200).json({ message: "Token minted successfully", data: token });
     }
   } catch (error) {

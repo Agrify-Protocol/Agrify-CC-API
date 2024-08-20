@@ -50,6 +50,11 @@ const getToken = async (tokenSymbol) => {
     const token = await Token.findOne({ tokenSymbol: tokenSymbol });
 
     if (!token) throw new Error("Unable to get token");
+    const hederaToken = await hederaService.getHederaToken(token.tokenId);
+    token.totalTonnes = Number(hederaToken.totalSupply / Math.pow(10, hederaToken.decimals));
+    token.availableTonnes = await queryTokenBalance(token.tokenId);
+    await token.save();
+
     return token;
   } catch (error) {
     console.error({ error: error.message });
@@ -60,7 +65,16 @@ const getTokenByID = async (tokenId) => {
   try {
     const token = await Token.findOne({ tokenId: tokenId });
 
+
     if (!token) throw new Error("Unable to get token");
+
+    const hederaToken = await hederaService.getHederaToken(tokenId);
+    token.totalTonnes = Number(hederaToken.totalSupply / Math.pow(10, hederaToken.decimals));
+
+
+    token.availableTonnes = await queryTokenBalance(tokenId);
+    await token.save();
+    // token.availableTonnes = tokenBalance;
     return token;
   } catch (error) {
     console.error({ error: error.message });
@@ -89,14 +103,8 @@ const queryTokenBalance = async (tokenId, accountID) => {
       }
     }
 
-    // await mp.forEach((balance, tokenID) => {
-    //   const token = getTokenByID(tokenID);
-    //   token.balance = balance;
-    //   token.save();
-    // });
     return token;
 
-    // return receipt;
   } catch (error) {
     console.error({ error: error.message });
   }
@@ -157,13 +165,13 @@ const associateToken = async (tokenID, accountID) => {
 
     const buyer = await User.findById(accountID);
 
-    if (!buyer){ 
+    if (!buyer) {
       throw new Error("User not found");
     }
     if (buyer.associatedTokens.includes(tokenID)) {
       throw new Error("Token already associated to account");
     }
-  
+
     await buyer.associatedTokens.push(tokenID);
     await buyer.save();
 
@@ -191,11 +199,10 @@ const purchaseToken = async (
   try {
     const token = await getTokenByID(tokenID);
 
-    const tokenBalance = queryTokenBalance(tokenID);
+    const tokenBalance = await queryTokenBalance(tokenID);
 
     token.availableTonnes = tokenBalance;
-
-    // const token = await hederaService.getHederaToken(tokenID);
+    await token.save();
 
     // const tokenID = token.tokenId;
 
@@ -235,10 +242,18 @@ const purchaseToken = async (
 
       const farmList = project.farms;
 
-      //FOR EACH FARM IN FARMS
+          //Check for "ghost" farms
+    farmList.forEach(async (farmRef) => {
+      const farmID = farmRef.toString();
+      const farm = await Farm.findOne({ _id: farmID });
+      
+    });
+
+
+      // //FOR EACH FARM IN FARMS
       farmList.forEach(async (farmRef) => {
         const farmID = farmRef.toString();
-        const farm = await Farm.findOne({ _id: farmID});
+        const farm = await Farm.findOne({ _id: farmID });
         // FARMER PERCENTAGE (FP) = farmerAvailableTonnes / projectAvailableTonnes 
         const FP = farm.availableTonnes / token.availableTonnes;
 
@@ -247,17 +262,17 @@ const purchaseToken = async (
         farm.availableTonnes -= debitedAmountInTonnes;
         await farm.save();
 
-      //FARMER WALLET CREDIT = 70% * (FP * amountInFiat)
-      const creditAmount = (0.7 * FP * amountInFiat).toFixed(2);
-      const farmerWallet = await walletService.getMyWallet(farm.farmer);
+        //FARMER WALLET CREDIT = 70% * (FP * amountInFiat)
+        const creditAmount = (0.7 * FP * amountInFiat).toFixed(2);
+        const farmerWallet = await walletService.getMyWallet(farm.farmer);
 
-      const creditTx = await walletService.creditWallet(
-        creditAmount,
-        farmerWallet.id,
-        `Sold ${debitedAmountInTonnes} tonnes of ${token.tokenSymbol}`
-      );
+        const creditTx = await walletService.creditWallet(
+          creditAmount,
+          farmerWallet.id,
+          `Sold ${debitedAmountInTonnes} tonnes of ${token.tokenSymbol}`
+        );
 
-      //Add tokens to farmer wallet
+        //Add tokens to farmer wallet
         await walletService.addTokenToFarmerWallet(farmerWallet.id, token.id, debitedAmountInTonnes, FP);
 
       });

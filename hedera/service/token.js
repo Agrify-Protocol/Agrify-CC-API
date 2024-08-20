@@ -207,7 +207,7 @@ const queryAdminTokenBalance = async () => {
 	//Sign with the client operator private key and submit to a Hedera network
 	const tokenBalance = await query.execute(client);
 
-	console.log("The token balance(s) for this account: " + tokenBalance.tokens.toString());
+	// console.log("The token balance(s) for this account: " + tokenBalance.tokens.toString());
 
 	return tokenBalance;
 

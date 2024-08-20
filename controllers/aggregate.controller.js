@@ -18,9 +18,10 @@ const getAggregateProjectById = async (req, res) => {
       path: "farms",
       select: farmFields,
     }).populate({ path: "projectToken" })
-    .sort({ availableTonnes: -1 });
-    const tokenBalance = tokenService.queryTokenBalance(project.projectToken.tokenId);
-    project.projectToken.availableTonnes = tokenBalance;
+      .sort({ availableTonnes: -1 });
+    const projectToken = await tokenService.getTokenByID(project.projectToken.tokenId);
+    project.projectToken = projectToken;
+    await project.save();
 
     if (!project) {
       return res
@@ -42,7 +43,7 @@ const deleteUnsafe = async (req, res) => {
         .json({ message: `Project with ID: ${id} not found!` });
     }
     await project.deleteOne();
-    return res.status(200).json({message: "Deleted"});
+    return res.status(200).json({ message: "Deleted" });
   } catch (error) {
     console.log(error);
   }
@@ -172,7 +173,12 @@ const getAllAggregateProjects = async (req, res) => {
       .populate({
         path: "farms",
         select: "name state country category availableTonnes ",
-      });
+      })
+      .populate({
+        path: "projectToken",
+        select: "projectFarmers ",
+      })
+      ;
     const total = await Aggregate.countDocuments();
     const totalPages = Math.ceil(total / limit);
 
@@ -306,7 +312,7 @@ const preorderFarmProduce = async (req, res) => {
       name,
       phoneNumber,
       address
-     } = req.body;
+    } = req.body;
 
     const order = await BulkOrder.create({
       amount,
@@ -393,6 +399,18 @@ const addFarmToAggregate = async (req, res) => {
 
     const farmList = aggregate.farms;
 
+    //Check for "ghost" farms
+    farmList.forEach(async (farmRef) => {
+      const farmID = farmRef.toString();
+      const farm = await Farm.findById(farmID);
+
+      const a = "";
+      if (!farm) {
+        farmList.splice(farmList.indexOf(farmRef), 1);
+      }
+
+    });
+
     //Check if farm already belongs to aggregate
     const farmAlreadyExists = farmList.findIndex(t => t.toHexString() == farmID)
     if (farmAlreadyExists != -1) {
@@ -423,8 +441,8 @@ const addFarmToAggregate = async (req, res) => {
     // if (!token) throw new Error("Error minting project token");
 
     //Add farmer to tokenList
-    // await aggregate.projectFarmers.push(farm.farmer);
-    // await aggregate.save();
+    await aggregate.projectFarmers.push(farm.farmer);
+    await aggregate.save();
 
     res.status(200).json(aggregate);
   } catch (error) {
