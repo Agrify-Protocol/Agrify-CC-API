@@ -83,7 +83,7 @@ app.post("/api/v1/upload", upload.array("images"), async (req, res) => {
 });
 // CORS
 app.use(async (req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Origin", ["*","https://agrify-farmer-app.netlify.app"]);
   res.header(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"
