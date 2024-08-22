@@ -50,6 +50,22 @@ const updateFarmUnsafe = async (req, res) => {
     }
 }
 
+const updateFarmFields = async (req, res) => {
+    const { farmID } = req.params;
+    try {
+        const fields = req.body;
+        const farm = await Farm.findOneAndUpdate({_id: farmID}, fields, {new: true});
+        if (!farm) {
+            return res.status(404).json({ message: `Farm with ID: ${farmID} not found!` });
+        }
+
+        await farm.save();
+        return res.status(200).json(farm);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 const updatePreferredLanguage = async (req, res) => {
     const { id } = req.params;
     try {
@@ -62,7 +78,7 @@ const updatePreferredLanguage = async (req, res) => {
         const preferredLanguage = language.toLowerCase().trim();
 
         if (!['english', 'swahili', 'pidgin'].includes(preferredLanguage)){
-            return res.status(400).json({ message: "Invalid request" });
+            return res.status(400).json({ message: "Supported languages are: ['english', 'swahili', 'pidgin']" });
         }
 
         farm.preferredLanguage = preferredLanguage;
@@ -402,6 +418,7 @@ module.exports = {
     createFarmUnsafe,
     deleteFarmUnsafe, 
     updateFarmUnsafe, 
+    updateFarmFields,
     getFarmById, 
     getFarmByFarmerId, 
     getAllFarms, 
