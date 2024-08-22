@@ -12,6 +12,10 @@ const aggregateSchema = new Schema(
       type: String,
       required: true,
     },
+    about: {
+      type: String,
+      required: true,
+    },
     description: {
       type: String,
       required: true,
@@ -70,7 +74,7 @@ const aggregateSchema = new Schema(
     longitude: {
       type: Number,
       required: true,
-    },  
+    },
     state: {
       type: String,
       required: true,
@@ -81,10 +85,10 @@ const aggregateSchema = new Schema(
     },
     category: {
       type: String,
-      enum : ['cassava', 'yam', 'tomato', 'soybean', 'rice', 'maize'],
+      enum: ['cassava', 'yam', 'tomato', 'soybean', 'rice', 'maize'],
       required: true
-  },
-// projectProvider: {
+    },
+    // projectProvider: {
     //   type: String,
     // },
     // projectWebsite: {
