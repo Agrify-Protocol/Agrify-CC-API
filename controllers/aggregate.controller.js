@@ -19,15 +19,18 @@ const getAggregateProjectById = async (req, res) => {
       select: farmFields,
     }).populate({ path: "projectToken" })
       .sort({ availableTonnes: -1 });
-    const projectToken = await tokenService.getTokenByID(project.projectToken.tokenId);
-    project.projectToken = projectToken;
-    await project.save();
 
     if (!project) {
       return res
         .status(404)
         .json({ message: `Project with ID: ${id} not found!` });
     }
+
+    const projectToken = await tokenService.getTokenByID(project.projectToken.tokenId);
+    if (projectToken) {
+      project.projectToken = projectToken;
+      await project.save();
+    } 
     return res.status(200).json(project);
   } catch (error) {
     console.log(error);
@@ -49,6 +52,21 @@ const deleteUnsafe = async (req, res) => {
   }
 };
 
+const updateProjectFields = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const fields = req.body;
+    const project = await Aggregate.findOneAndUpdate({ _id: id }, fields, { new: true });
+    if (!project) {
+      return res.status(404).json({ message: `Project with ID: ${id} not found!` });
+    }
+
+    await project.save();
+    return res.status(200).json(project);
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 
 const getProjectsByCategory = async (req, res) => {
@@ -94,8 +112,6 @@ const getProjectsByCategory = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-
 
 const getAllProjectCategories = async (req, res) => {
 
@@ -238,6 +254,7 @@ const createAggregateProject = async (req, res) => {
     const {
       title,
       description,
+      about,
       mission,
       methodology,
       price,
@@ -272,6 +289,7 @@ const createAggregateProject = async (req, res) => {
       projectId: aggregateId,
       title,
       description,
+      about,
       mission,
       methodology,
       price: parseFloat(price),
@@ -463,4 +481,5 @@ module.exports = {
   getAllPreOrders,
   getOrderById,
   deleteUnsafe,
+  updateProjectFields,
 };

@@ -13,6 +13,7 @@ const {
 const {
   createAggregateProject,
   deleteUnsafe,
+  updateProjectFields,
   getAllAggregateProjects,
   getProjectsByCategory,
   getAllProjectCategories,
@@ -50,6 +51,7 @@ router.post(
   createAggregateProject
 );
 router.get("/projects/:id", authMiddleware, getProjectById);
+router.put("/projects/aggregate/update/:id", authMiddleware, updateProjectFields);
 router.get("/projects/aggregate/:id", authMiddleware, getAggregateProjectById);
 router.delete("/projects/aggregate/:id", authMiddleware, deleteUnsafe);
 
