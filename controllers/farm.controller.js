@@ -32,17 +32,24 @@ const deleteFarmUnsafe = async (req, res) => {
     }
 }
 
-const updateFarmUnsafe = async (req, res) => {
+const updateFarmFields = async (req, res) => {
     const { id } = req.params;
     try {
         const farm = await Farm.findById(id);
         if (!farm) {
             return res.status(404).json({ message: `Farm with ID: ${id} not found!` });
         }
-        const { description, cultivationType } = req.body;
+        const { name, preferredLanguage } = req.body;
 
-        farm.description = description;
-        farm.cultivationType = cultivationType;
+        if (name) {
+            farm.name = name;
+        } 
+        if (preferredLanguage) {
+            if (!['english', 'swahili', 'pidgin'].includes(preferredLanguage.toLowerCase().trim())) {
+                return res.status(400).json({ message: "Supported languages are: ['english', 'swahili', 'pidgin']" });
+            }    
+            farm.preferredLanguage = preferredLanguage.toLowerCase().trim();
+        }
         await farm.save();
         return res.status(200).json(farm);
     } catch (error) {
@@ -50,11 +57,11 @@ const updateFarmUnsafe = async (req, res) => {
     }
 }
 
-const updateFarmFields = async (req, res) => {
+const updateFarmUnsafe = async (req, res) => {
     const { farmID } = req.params;
     try {
         const fields = req.body;
-        const farm = await Farm.findOneAndUpdate({_id: farmID}, fields, {new: true});
+        const farm = await Farm.findOneAndUpdate({ _id: farmID }, fields, { new: true });
         if (!farm) {
             return res.status(404).json({ message: `Farm with ID: ${farmID} not found!` });
         }
@@ -66,29 +73,29 @@ const updateFarmFields = async (req, res) => {
     }
 }
 
-const updatePreferredLanguage = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const farm = await Farm.findById(id);
-        if (!farm) {
-            return res.status(404).json({ message: `Farm with ID: ${id} not found!` });
-        }
-        const { language } = req.body;
+// const updatePreferredLanguage = async (req, res) => {
+//     const { id } = req.params;
+//     try {
+//         const farm = await Farm.findById(id);
+//         if (!farm) {
+//             return res.status(404).json({ message: `Farm with ID: ${id} not found!` });
+//         }
+//         const { language } = req.body;
 
-        const preferredLanguage = language.toLowerCase().trim();
+//         const preferredLanguage = language.toLowerCase().trim();
 
-        if (!['english', 'swahili', 'pidgin'].includes(preferredLanguage)){
-            return res.status(400).json({ message: "Supported languages are: ['english', 'swahili', 'pidgin']" });
-        }
+//         if (!['english', 'swahili', 'pidgin'].includes(preferredLanguage)) {
+//             return res.status(400).json({ message: "Supported languages are: ['english', 'swahili', 'pidgin']" });
+//         }
 
-        farm.preferredLanguage = preferredLanguage;
-        await farm.save();
-        return res.status(200).json({ success: true, preferredLanguage: preferredLanguage });
+//         farm.preferredLanguage = preferredLanguage;
+//         await farm.save();
+//         return res.status(200).json({ success: true, preferredLanguage: preferredLanguage });
 
-    } catch (error) {
-        console.log(error);
-    }
-}
+//     } catch (error) {
+//         console.log(error);
+//     }
+// }
 
 const addImageToGallery = async (req, res) => {
     const { farmID } = req.params;
@@ -130,7 +137,7 @@ const calculateCarbonOnFarm = async (req, res) => {
             return res.status(404).json({ message: `Farmer does not exist with ID ${farmerId}` });
         }
 
-        const farm = await Farm.findOne({ farmer: farmer._id }, null, { sort: {createdAt: -1}}).select(
+        const farm = await Farm.findOne({ farmer: farmer._id }, null, { sort: { createdAt: -1 } }).select(
             ["name", "state", "country", "category", "lat", "long", "area", "availableTonnes"]
         );
 
@@ -413,17 +420,18 @@ const getFarmByFarmerId = async (req, res) => {
 
 
 
-module.exports = { 
-    createFarm, 
+module.exports = {
+    createFarm,
     createFarmUnsafe,
-    deleteFarmUnsafe, 
-    updateFarmUnsafe, 
+    deleteFarmUnsafe,
+    updateFarmUnsafe,
     updateFarmFields,
-    getFarmById, 
-    getFarmByFarmerId, 
-    getAllFarms, 
-    addImageToGallery, 
-    addProjectMilestones, 
-    calculateCarbon, 
+    getFarmById,
+    getFarmByFarmerId,
+    getAllFarms,
+    addImageToGallery,
+    addProjectMilestones,
+    calculateCarbon,
     calculateCarbonOnFarm,
-    updatePreferredLanguage };
+    // updatePreferredLanguage
+};

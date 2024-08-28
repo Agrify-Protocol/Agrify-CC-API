@@ -15,7 +15,8 @@ const {
     addProjectMilestones, 
     calculateCarbon, 
     calculateCarbonOnFarm,
-    updatePreferredLanguage } = require('../controllers/farm.controller');
+    // updatePreferredLanguage 
+} = require('../controllers/farm.controller');
 
 const router = express.Router();
 
@@ -36,7 +37,7 @@ router.post('/ufarm', authMiddleware,
 router.get('/farm/:id', authMiddleware, getFarmById);
 router.delete('/farm/:id', authMiddleware, deleteFarmUnsafe);
 router.put('/farm/:farmID/milestones', authMiddleware, addProjectMilestones);
-router.put('/farm/:id/language', authMiddleware, updatePreferredLanguage);
+// router.put('/farm/:id/language', authMiddleware, updatePreferredLanguage);
 router.put('/ufarm/:farmID', authMiddleware, updateFarmUnsafe);
 router.put('/farm/update/:farmID', authMiddleware, updateFarmFields);
 router.put('/farm/:farmID', authMiddleware,
