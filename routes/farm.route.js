@@ -39,7 +39,7 @@ router.delete('/farm/:id', authMiddleware, deleteFarmUnsafe);
 router.put('/farm/:farmID/milestones', authMiddleware, addProjectMilestones);
 // router.put('/farm/:id/language', authMiddleware, updatePreferredLanguage);
 router.put('/ufarm/:farmID', authMiddleware, updateFarmUnsafe);
-router.put('/farm/update/:farmID', authMiddleware, updateFarmFields);
+router.put('/farm/update/:id', authMiddleware, updateFarmFields);
 router.put('/farm/:farmID', authMiddleware,
     upload.fields([
         { name: "image" },
