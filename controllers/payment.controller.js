@@ -3,8 +3,10 @@
 const paystackSkey = process.env.PAYSTACK_SECRET_KEY;
 const axios = require("axios");
 const Invoice = require("../models/invoice.model");
+const tokenService = require("../service/tokenService");
 const Purchase = require("../models/purchase.model");
 const Project = require("../models/project.model");
+const Token = require("../models/token.model");
 const Aggregate = require("../models/aggregate.model");
 
 const User = require("../models/user.model");
@@ -62,6 +64,13 @@ const payWithCard = async (req, res) => {
       .json({ message: `Project does not exist with ID ${projectId}` });
   }
 
+  const projectToken = await Token.findById(project.projectToken);
+  if (!projectToken) {
+    return res
+      .status(404)
+      .json({ message: `Project does not have tokens available for sale` });
+  }
+
   const totalCost = tonnes * 10 * 1500;
 
   try {
@@ -88,7 +97,13 @@ const payWithCard = async (req, res) => {
         // res.status(500).json({ error: true, message: error });
         console.log(error);
       });
-  } catch (error) {}
+      //TOKEN TRANSFER
+      const txReceipt = await tokenService.purchaseToken(projectToken.tokenId, tonnes*100, userId);
+      console.log(`Transaction Receipt: ${txReceipt}`);
+
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const payInvoice = async (req, res) => {
