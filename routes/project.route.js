@@ -14,6 +14,7 @@ const {
   createAggregateProject,
   deleteUnsafe,
   updateProjectFields,
+  updateProjectToken,
   getAllAggregateProjects,
   getProjectsByCategory,
   getAllProjectCategories,
@@ -52,6 +53,7 @@ router.post(
 );
 router.get("/projects/:id", authMiddleware, getProjectById);
 router.put("/projects/aggregate/update/:id", authMiddleware, updateProjectFields);
+router.put("/projects/aggregate/updateToken/:id", authMiddleware, updateProjectToken);
 router.get("/projects/aggregate/:id", authMiddleware, getAggregateProjectById);
 router.delete("/projects/aggregate/:id", authMiddleware, deleteUnsafe);
 

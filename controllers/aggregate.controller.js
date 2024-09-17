@@ -68,6 +68,33 @@ const updateProjectFields = async (req, res) => {
   }
 }
 
+const updateProjectToken = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const project = await Aggregate.findById(id).populate({ path: "projectToken" })
+    .sort({ availableTonnes: -1 });
+
+    if (!project) {
+      return res.status(404).json({ message: `Project with ID: ${id} not found!` });
+    }
+
+    const {projectTokenID} = req.body;
+
+    const token = await tokenService.getTokenByID(projectTokenID);
+    if (!token) {
+      return res.status(404).json({ message: `Invalid token!` });
+    }
+
+    if (projectTokenID) {
+    project.projectToken = token;
+    await project.save();
+    }
+    return res.status(200).json(project);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 
 const getProjectsByCategory = async (req, res) => {
   const { category } = req.params;
@@ -482,4 +509,5 @@ module.exports = {
   getOrderById,
   deleteUnsafe,
   updateProjectFields,
+  updateProjectToken,
 };

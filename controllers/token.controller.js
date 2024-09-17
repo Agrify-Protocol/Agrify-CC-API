@@ -49,19 +49,31 @@ const getTokenByID = async (req, res) => {
 
 const createToken = async (req, res) => {
   try {
-    const { tokenName, tokenSymbol, amountInCirculation } =
+    const { projectId,
+      tokenName,
+      tokenOwner,
+      minimumPurchaseTonnes,
+      price,
+      tokenId,
+      tokenSymbol } =
       req.body;
-    const user = await MrvUser.findOne({ _id: req.userId });
+    // const user = await MrvUser.findOne({ _id: req.userId });
 
-    if (!user.isFarmer) {
-      return res.status(400).json({ message: "Only farmers can own tokens" });
-    }
+    // if (!user.isFarmer) {
+    //   return res.status(400).json({ message: "Only farmers can own tokens" });
+    // }
 
-    else {
-      const token = await tokenService.createToken(tokenName, tokenSymbol, amountInCirculation);
+    // else {
+      const token = await tokenService.createToken(projectId,
+        tokenName,
+        tokenOwner,
+        minimumPurchaseTonnes,
+        price,
+        tokenId,
+        tokenSymbol);
       if (!token) throw new Error("Error creating token");
       res.status(201).json({ token });
-    }
+    // }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
