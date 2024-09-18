@@ -73,10 +73,10 @@ const payWithCard = async (req, res) => {
 
   const totalCost = tonnes * 10 * 1500;
 
+  //TOKEN TRANSFER
+  const txReceipt = await tokenService.purchaseToken(projectToken.tokenId, tonnes*100, userId);
+  console.log(`Transaction Receipt: ${txReceipt}`);
   try {
-    //TOKEN TRANSFER
-    const txReceipt = await tokenService.purchaseToken(projectToken.tokenId, tonnes*100, userId);
-    console.log(`Transaction Receipt: ${txReceipt}`);
 
     axios
       .post(
