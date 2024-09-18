@@ -74,6 +74,10 @@ const payWithCard = async (req, res) => {
   const totalCost = tonnes * 10 * 1500;
 
   try {
+    //TOKEN TRANSFER
+    const txReceipt = await tokenService.purchaseToken(projectToken.tokenId, tonnes*100, userId);
+    console.log(`Transaction Receipt: ${txReceipt}`);
+
     axios
       .post(
         "https://api.paystack.co/transaction/initialize",
@@ -97,10 +101,6 @@ const payWithCard = async (req, res) => {
         // res.status(500).json({ error: true, message: error });
         console.log(error);
       });
-      //TOKEN TRANSFER
-      const txReceipt = await tokenService.purchaseToken(projectToken.tokenId, tonnes*100, userId);
-      console.log(`Transaction Receipt: ${txReceipt}`);
-
   } catch (error) {
     console.log(error);
   }

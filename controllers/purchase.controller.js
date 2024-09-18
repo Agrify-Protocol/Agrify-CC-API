@@ -15,7 +15,7 @@ const getPurchasesByProjectId = async (req, res) => {
     const userId = req.userId;
     const { projectId } = req.params;
 
-    const purchases = await Purchase.find({ userId, projectId });
+    const purchases = await Purchase.find({ userId, projectId }).sort({ _id: -1 });
 
     if (!purchases || purchases.length === 0) {
       return res

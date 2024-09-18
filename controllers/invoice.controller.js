@@ -119,7 +119,7 @@ const getAllInvoicesForProject = async (req, res) => {
     const invoicesForProject = await Invoice.find({
       userId,
       projectId,
-    }).populate("projectId");
+    }).populate("projectId").sort({ _id: -1 });
     res.status(200).json(invoicesForProject);
   } catch (error) {}
 };
