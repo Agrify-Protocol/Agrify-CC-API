@@ -98,7 +98,7 @@ const payWithCard = async (req, res) => {
         console.log(error);
       });
       //TOKEN TRANSFER
-      const txReceipt = await tokenService.purchaseToken(projectToken.tokenId, tonnes*100, userId);
+      const txReceipt = await tokenService.purchaseToken(projectToken.tokenId, tonnes, userId);
       console.log(`Transaction Receipt: ${txReceipt}`);
 
   } catch (error) {
