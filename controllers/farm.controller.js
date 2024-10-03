@@ -45,8 +45,8 @@ const updateFarmFields = async (req, res) => {
             farm.name = name;
         } 
         if (preferredLanguage) {
-            if (!['english', 'swahili', 'pidgin'].includes(preferredLanguage.toLowerCase().trim())) {
-                return res.status(400).json({ message: "Supported languages are: ['english', 'swahili', 'pidgin']" });
+            if (!['english', 'swahili', 'pidgin', 'arabic', 'french', 'portuguese', 'spanish'].includes(preferredLanguage.toLowerCase().trim())) {
+                return res.status(400).json({ message: "Supported languages are: ['english', 'swahili', 'pidgin', 'arabic', 'french', 'portuguese', 'spanish']" });
             }    
             farm.preferredLanguage = preferredLanguage.toLowerCase().trim();
         }
