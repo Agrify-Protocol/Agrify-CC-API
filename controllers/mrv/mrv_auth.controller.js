@@ -69,7 +69,7 @@ const login = async (req, res) => {
     const mrvUser = await MrvUser.findOne({ email });
 
     if (!mrvUser) {
-      return res.status(401).json({ eror: "Invalid Credentials!" });
+      return res.status(401).json({ error: "Invalid Credentials!" });
     }
 
     const isPassword = await bcrypt.compare(password, mrvUser.password);
